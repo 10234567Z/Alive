@@ -1,0 +1,19 @@
+[package]
+name = "alive-evolution-engine"
+version = "0.1.0"
+edition = "2021"
+description = "Genetic algorithm evolution engine for ALIVE protocol, targeting PolkaVM (RISC-V)"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+
+[features]
+default = ["std"]
+std = []
+
+[profile.release]
+opt-level = "s"
+lto = true
+panic = "abort"
