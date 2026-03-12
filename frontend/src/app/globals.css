@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-nb-bg: #F7F5F2;
+  --color-nb-ink: #111111;
+  --color-nb-accent: #6EE7B7;
+  --color-nb-accent-2: #60A5FA;
+  --color-nb-warn: #F59E0B;
+  --color-nb-error: #EF4444;
+  --color-nb-ok: #10B981;
+  --color-nb-card: #FFFFFF;
+  --color-nb-purple: #A855F7;
+  --color-nb-pink: #EC4899;
+
+  --shadow-nb: 8px 8px 0 0 rgba(0, 0, 0, 0.9);
+  --shadow-nb-sm: 4px 4px 0 0 rgba(0, 0, 0, 0.9);
+  --shadow-nb-hover: 12px 12px 0 0 rgba(0, 0, 0, 0.9);
+
+  --radius-nb: 1.25rem;
+
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-nb-bg);
+  color: var(--color-nb-ink);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+}
+
+code, pre {
+  font-family: var(--font-mono);
+}
+
+/* ── Neo-Brutalist utility classes ─────────────────────────── */
+
+.nb-card {
+  background: var(--color-nb-card);
+  border: 3px solid var(--color-nb-ink);
+  border-radius: var(--radius-nb);
+  box-shadow: var(--shadow-nb);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.nb-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-nb-hover);
+}
+
+.nb-card:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-nb-sm);
+}
+
+.nb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1rem;
+  border: 3px solid var(--color-nb-ink);
+  border-radius: var(--radius-nb);
+  box-shadow: var(--shadow-nb-sm);
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.nb-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-nb);
+}
+
+.nb-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.nb-btn-primary {
+  background: var(--color-nb-accent);
+  color: var(--color-nb-ink);
+}
+
+.nb-btn-secondary {
+  background: var(--color-nb-accent-2);
+  color: var(--color-nb-ink);
+}
+
+.nb-btn-danger {
+  background: var(--color-nb-error);
+  color: white;
+}
+
+.nb-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  border: 3px solid var(--color-nb-ink);
+  border-radius: var(--radius-nb);
+  background: var(--color-nb-card);
+  outline: none;
+  transition: box-shadow 0.15s ease;
+}
+
+.nb-input:focus {
+  box-shadow: var(--shadow-nb-sm);
+}
+
+.nb-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 2px solid var(--color-nb-ink);
+  border-radius: 999px;
+}
