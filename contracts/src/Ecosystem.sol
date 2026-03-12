@@ -81,6 +81,7 @@ contract Ecosystem {
     event EpochAdvanced(uint256 indexed epoch, Phase phase);
     event CapitalAllocated(uint256 totalAllocated, uint256 creatureCount);
     event InitialCreaturesSpawned(uint256 count);
+    event CreatureRegistered(address indexed creature);
 
     // ----------------------------------------------------------------
     // Modifiers
@@ -119,6 +120,15 @@ contract Ecosystem {
         genePool = GenePool(_genePool);
     }
 
+    /// @notice Register a newly seeded Creature into the active population.
+    ///         Only callable by the GenePool (via injectSeed).
+    /// @param creature The address of the Creature contract to register.
+    function registerCreature(address creature) external {
+        require(msg.sender == address(genePool), "Ecosystem: caller not genePool");
+        activeCreatures.push(creature);
+        emit CreatureRegistered(creature);
+    }
+
     // ----------------------------------------------------------------
     // User-Facing: Deposit / Withdraw
     // ----------------------------------------------------------------
@@ -150,19 +160,30 @@ contract Ecosystem {
 
     /// @notice Withdraw stablecoins from the ecosystem.
     ///         Burns shares and returns proportional capital + yield.
+    ///         Uses the live system value (vault + creature balances).
     /// @param shareAmount Number of shares to burn.
     function withdraw(uint256 shareAmount) external {
         require(shareAmount > 0, "Ecosystem: zero withdraw");
         require(shares[msg.sender] >= shareAmount, "Ecosystem: insufficient shares");
 
-        // value = shareAmount * totalCapital / totalShares
-        uint256 value = (shareAmount * totalCapital) / totalShares;
+        // Compute value from total system value (vault + creatures)
+        uint256 systemValue = _totalSystemValue();
+        uint256 value = (shareAmount * systemValue) / totalShares;
+
+        // Ensure ecosystem vault has enough; if not, recall from creatures
+        uint256 vaultBal = stablecoin.balanceOf(address(this));
+        if (value > vaultBal) {
+            _recallCapital(value - vaultBal);
+        }
 
         shares[msg.sender] -= shareAmount;
         totalShares -= shareAmount;
-        totalCapital -= value;
+        totalCapital = _totalSystemValue() - value; // will be updated after transfer
 
         stablecoin.safeTransfer(msg.sender, value);
+
+        // Re-sync after transfer
+        totalCapital = _totalSystemValue();
 
         emit Withdrawn(msg.sender, value, shareAmount);
     }
@@ -234,6 +255,33 @@ contract Ecosystem {
     }
 
     // ----------------------------------------------------------------
+    // Internal: Capital Management
+    // ----------------------------------------------------------------
+
+    /// @dev Recall capital from creatures back to the vault.
+    ///      Used when a user withdraws and the vault doesn't have enough.
+    ///      Proportionally recalls from all alive creatures.
+    function _recallCapital(uint256 needed) internal {
+        uint256 totalCreatureBal = 0;
+        for (uint256 i = 0; i < activeCreatures.length; i++) {
+            totalCreatureBal += stablecoin.balanceOf(activeCreatures[i]);
+        }
+        if (totalCreatureBal == 0) return;
+
+        // Recall proportionally from each creature
+        for (uint256 i = 0; i < activeCreatures.length; i++) {
+            uint256 creatureBal = stablecoin.balanceOf(activeCreatures[i]);
+            if (creatureBal == 0) continue;
+
+            uint256 recallAmount = (needed * creatureBal) / totalCreatureBal;
+            if (recallAmount > creatureBal) recallAmount = creatureBal;
+            if (recallAmount == 0) continue;
+
+            ICreature(activeCreatures[i]).returnCapital(recallAmount);
+        }
+    }
+
+    // ----------------------------------------------------------------
     // Internal: Phase Execution
     // ----------------------------------------------------------------
 
@@ -258,8 +306,8 @@ contract Ecosystem {
         }
         totalYieldGenerated += epochYield;
 
-        // Update totalCapital to reflect actual vault balance
-        totalCapital = stablecoin.balanceOf(address(this));
+        // Update totalCapital to reflect TOTAL system value (vault + creatures)
+        totalCapital = _totalSystemValue();
     }
 
     /// @dev Run evolution via GenePool — score, select, breed, kill.
@@ -281,14 +329,29 @@ contract Ecosystem {
             activeCreatures.push(newPop[i]);
         }
 
-        // Reclaim capital returned by killed creatures
-        totalCapital = stablecoin.balanceOf(address(this));
+        // Reclaim capital returned by killed creatures + track total system value
+        totalCapital = _totalSystemValue();
     }
 
     /// @dev Allocate capital to surviving + newborn Creatures, weighted by fitness.
+    ///      First recalls ALL capital from creatures back to the vault, then
+    ///      redistributes based on fitness weights. This prevents the vault from
+    ///      running dry when creatures hold capital from prior epochs.
     function _allocateCapital() internal {
         uint256 creatureCount = activeCreatures.length;
-        if (creatureCount == 0 || totalCapital == 0) return;
+        if (creatureCount == 0) return;
+
+        // ---- Step 1: Recall ALL capital from creatures into the vault ----
+        for (uint256 i = 0; i < creatureCount; i++) {
+            uint256 creatureBal = stablecoin.balanceOf(activeCreatures[i]);
+            if (creatureBal > 0 && ICreature(activeCreatures[i]).isAlive()) {
+                ICreature(activeCreatures[i]).returnCapital(creatureBal);
+            }
+        }
+
+        // Now the vault holds all system capital
+        uint256 vaultBalance = stablecoin.balanceOf(address(this));
+        if (vaultBalance == 0) return;
 
         // Collect fitness scores from the last evolution run
         // For the first epoch (before any evolution), use equal weighting
@@ -296,20 +359,20 @@ contract Ecosystem {
 
         if (currentEpoch <= 1) {
             // Equal allocation for first epoch
-            uint256 perCreature = totalCapital / creatureCount;
+            uint256 perCreature = vaultBalance / creatureCount;
             for (uint256 i = 0; i < creatureCount; i++) {
                 if (perCreature > 0 && ICreature(activeCreatures[i]).isAlive()) {
                     stablecoin.forceApprove(activeCreatures[i], perCreature);
                     ICreature(activeCreatures[i]).receiveCapital(perCreature);
                 }
             }
-            emit CapitalAllocated(totalCapital, creatureCount);
+            emit CapitalAllocated(vaultBalance, creatureCount);
+            // Update totalCapital to reflect total system value
+            totalCapital = _totalSystemValue();
             return;
         }
 
-        // Fitness-weighted allocation
-        // Use the IEvolutionEngine results cached by GenePool if available
-        // For simplicity, weight by epochsSurvived * (1 + cumulativeReturn normalization)
+        // ---- Step 2: Fitness-weighted re-distribution ----
         uint256[] memory weights = new uint256[](creatureCount);
         uint256 totalWeight = 0;
 
@@ -319,7 +382,6 @@ contract Ecosystem {
             (, int256 cr, uint256 es, , ) = ICreature(activeCreatures[i]).getPerformance();
 
             // Weight = epochsSurvived + bonus for positive cumulative return
-            // Shift cumulative return to avoid negatives (add a base of 1000)
             uint256 w = es + 1; // at least 1
             if (cr > 0) {
                 w += uint256(cr) / 1e18; // scale down if using 18-decimal tokens
@@ -330,7 +392,7 @@ contract Ecosystem {
 
         if (totalWeight == 0) {
             // Fallback to equal
-            uint256 perCreature = totalCapital / creatureCount;
+            uint256 perCreature = vaultBalance / creatureCount;
             for (uint256 i = 0; i < creatureCount; i++) {
                 if (perCreature > 0 && ICreature(activeCreatures[i]).isAlive()) {
                     stablecoin.forceApprove(activeCreatures[i], perCreature);
@@ -342,7 +404,7 @@ contract Ecosystem {
             for (uint256 i = 0; i < creatureCount; i++) {
                 if (!ICreature(activeCreatures[i]).isAlive()) continue;
 
-                uint256 amount = (totalCapital * weights[i]) / totalWeight;
+                uint256 amount = (vaultBalance * weights[i]) / totalWeight;
                 if (amount > 0) {
                     stablecoin.forceApprove(activeCreatures[i], amount);
                     ICreature(activeCreatures[i]).receiveCapital(amount);
@@ -350,8 +412,8 @@ contract Ecosystem {
                 }
             }
             // Handle dust — give remainder to first alive creature
-            uint256 dust = totalCapital - allocated;
-            if (dust > 0 && creatureCount > 0) {
+            if (allocated < vaultBalance) {
+                uint256 dust = vaultBalance - allocated;
                 for (uint256 i = 0; i < creatureCount; i++) {
                     if (ICreature(activeCreatures[i]).isAlive()) {
                         stablecoin.forceApprove(activeCreatures[i], dust);
@@ -362,7 +424,24 @@ contract Ecosystem {
             }
         }
 
-        emit CapitalAllocated(totalCapital, creatureCount);
+        emit CapitalAllocated(vaultBalance, creatureCount);
+
+        // After allocation, totalCapital must reflect total system value
+        totalCapital = _totalSystemValue();
+    }
+
+    // ----------------------------------------------------------------
+    // Internal: System Value
+    // ----------------------------------------------------------------
+
+    /// @dev Compute total system value = ecosystem vault + all creature balances.
+    ///      This ensures shareValue always accounts for capital held by creatures.
+    function _totalSystemValue() internal view returns (uint256) {
+        uint256 total = stablecoin.balanceOf(address(this));
+        for (uint256 i = 0; i < activeCreatures.length; i++) {
+            total += stablecoin.balanceOf(activeCreatures[i]);
+        }
+        return total;
     }
 
     // ----------------------------------------------------------------
@@ -380,6 +459,7 @@ contract Ecosystem {
     }
 
     /// @notice Get ecosystem state summary.
+    ///         deposits = total system value (vault + creature balances).
     function getEcosystemState()
         external
         view
@@ -392,7 +472,7 @@ contract Ecosystem {
         )
     {
         return (
-            totalCapital,
+            _totalSystemValue(),
             currentEpoch,
             activeCreatures.length,
             totalYieldGenerated,
@@ -401,8 +481,15 @@ contract Ecosystem {
     }
 
     /// @notice Compute the value of a user's shares in stablecoin terms.
+    ///         Uses live system-wide balance (vault + all creatures).
     function shareValue(address user) external view returns (uint256) {
         if (totalShares == 0) return 0;
-        return (shares[user] * totalCapital) / totalShares;
+        uint256 systemValue = _totalSystemValue();
+        return (shares[user] * systemValue) / totalShares;
+    }
+
+    /// @notice Get total system value (vault + all creature balances).
+    function totalSystemValue() external view returns (uint256) {
+        return _totalSystemValue();
     }
 }

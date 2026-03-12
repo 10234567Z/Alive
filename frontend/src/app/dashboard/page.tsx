@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { LayoutDashboard, PieChart, Activity, TrendingUp } from "lucide-react";
 import DepositPanel from "@/components/DepositPanel";
+import EpochControls from "@/components/EpochControls";
 import StatsBar from "@/components/StatsBar";
 import { useEcosystemStore } from "@/stores/ecosystem";
 import { POOL_TYPE_NAMES, POOL_TYPE_COLORS } from "@/lib/types";
@@ -55,9 +56,10 @@ export default function DashboardPage() {
       <StatsBar />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left — Deposit Panel */}
-        <div className="lg:col-span-1">
+        {/* Left — Deposit Panel + Epoch Controls */}
+        <div className="lg:col-span-1 space-y-6">
           <DepositPanel />
+          <EpochControls />
         </div>
 
         {/* Right — Analytics */}

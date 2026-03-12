@@ -1,9 +1,13 @@
 fe.*
 
 node_modules
-
+cache
+broadcast/*
+broadcast
+target/*
 target
-
+out/*
+out
 package-lock.json
 
 .next

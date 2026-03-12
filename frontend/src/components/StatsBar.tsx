@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Users, Layers, Zap, TrendingUp, Clock } from "lucide-react";
+import { Users, Layers, Zap, TrendingUp, Clock, Loader2 } from "lucide-react";
 import { useEcosystemStore } from "@/stores/ecosystem";
 import { Phase } from "@/lib/types";
 import { useMounted } from "@/lib/use-mounted";
@@ -16,7 +16,7 @@ const PHASE_LABELS: Record<Phase, { label: string; color: string }> = {
 
 export default function StatsBar() {
   const mounted = useMounted();
-  const { ecosystem, creatures } = useEcosystemStore();
+  const { ecosystem, creatures, isLoading } = useEcosystemStore();
 
   const alive = creatures.filter((c) => c.isAlive).length;
   const phase = PHASE_LABELS[ecosystem.phase];
@@ -32,7 +32,7 @@ export default function StatsBar() {
     {
       icon: Users,
       label: "Creatures",
-      value: `${alive} alive`,
+      value: alive > 0 ? `${alive} alive` : `${ecosystem.creatureCount} total`,
     },
     {
       icon: Clock,
@@ -65,7 +65,11 @@ export default function StatsBar() {
             className="flex items-center gap-3 bg-nb-card border-3 border-nb-ink rounded-nb px-4 py-3 shadow-nb-sm hover:-translate-y-0.5 hover:shadow-nb transition-all"
           >
             <div className="w-9 h-9 bg-nb-bg border-2 border-nb-ink rounded-lg flex items-center justify-center">
-              <stat.icon size={18} />
+              {isLoading ? (
+                <Loader2 size={18} className="animate-spin text-nb-ink/30" />
+              ) : (
+                <stat.icon size={18} />
+              )}
             </div>
             <div>
               <p className="text-xs font-mono text-nb-ink/50 uppercase whitespace-nowrap">

@@ -33,6 +33,7 @@ interface ICreature {
     function harvest() external;
     function kill() external;
     function receiveCapital(uint256 amount) external;
+    function returnCapital(uint256 amount) external;
     function getDNA() external view returns (DNA memory);
     function getEncodedDNA() external view returns (bytes memory);
     function getPerformance()

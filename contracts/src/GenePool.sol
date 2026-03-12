@@ -268,6 +268,11 @@ contract GenePool {
         uint256 currentEpoch
     ) external onlySeeder returns (address creature) {
         creature = factory.deploy(dna, 0, address(0), address(0), currentEpoch);
+        // Register the creature in the Ecosystem's active population
+        (bool ok, ) = ecosystem.call(
+            abi.encodeWithSignature("registerCreature(address)", creature)
+        );
+        require(ok, "GenePool: failed to register creature");
         emit SeedInjected(creature);
     }
 }

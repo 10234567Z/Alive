@@ -105,15 +105,15 @@ class Submitter:
 
         try:
             nonce = self.w3.eth.get_transaction_count(self.address)
+            gas_price = self.w3.eth.gas_price
             tx = self.genepool.functions.injectSeed(
                 dna_tuple,
                 current_epoch,
             ).build_transaction({
                 "from": self.address,
                 "nonce": nonce,
-                "gas": 500_000,
-                "maxFeePerGas": self.w3.eth.gas_price * 2,
-                "maxPriorityFeePerGas": self.w3.to_wei(1, "gwei"),
+                "gas": 2_000_000,
+                "gasPrice": gas_price,
             })
 
             signed = self.account.sign_transaction(tx)

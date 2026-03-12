@@ -1,37 +1,78 @@
 import { create } from "zustand";
-import { Creature, EcosystemState, EpochRecord } from "@/lib/types";
-import {
-  MOCK_CREATURES,
-  MOCK_ECOSYSTEM,
-  MOCK_EPOCHS,
-  MOCK_USER,
-} from "@/lib/mock-data";
+import { Creature, EcosystemState, EpochRecord, Phase } from "@/lib/types";
+
+// ── Default empty state (no mock data) ──
+
+const EMPTY_ECOSYSTEM: EcosystemState = {
+  totalDeposits: 0,
+  currentEpoch: 0,
+  creatureCount: 0,
+  yieldGenerated: 0,
+  phase: Phase.IDLE,
+};
+
+const EMPTY_USER = {
+  address: "" as string,
+  deposited: 0,
+  shares: 0,
+  shareValue: 0,
+};
 
 interface EcosystemStore {
-  // State
+  // State (hydrated from chain)
   ecosystem: EcosystemState;
   creatures: Creature[];
   epochs: EpochRecord[];
-  user: typeof MOCK_USER;
+  user: typeof EMPTY_USER;
   selectedCreature: Creature | null;
   isInspectorOpen: boolean;
+  isLoading: boolean;
 
-  // Actions
+  // Setters (called by hooks after reading chain)
+  setEcosystem: (e: EcosystemState) => void;
+  setCreatures: (c: Creature[]) => void;
+  setUser: (u: Partial<typeof EMPTY_USER>) => void;
+  setLoading: (l: boolean) => void;
+  addEpochRecord: (e: EpochRecord) => void;
+
+  // UI Actions
   selectCreature: (c: Creature | null) => void;
   openInspector: (c: Creature) => void;
   closeInspector: () => void;
+
+  // Write actions (optimistic updates — actual tx goes through wagmi)
   deposit: (amount: number) => void;
   withdraw: (amount: number) => void;
 }
 
 export const useEcosystemStore = create<EcosystemStore>((set) => ({
-  ecosystem: MOCK_ECOSYSTEM,
-  creatures: MOCK_CREATURES,
-  epochs: MOCK_EPOCHS,
-  user: MOCK_USER,
+  ecosystem: EMPTY_ECOSYSTEM,
+  creatures: [],
+  epochs: [],
+  user: EMPTY_USER,
   selectedCreature: null,
   isInspectorOpen: false,
+  isLoading: true,
 
+  // ── Chain data setters ──
+  setEcosystem: (ecosystem) =>
+    set({ ecosystem, isLoading: false }),
+
+  setCreatures: (creatures) =>
+    set({ creatures }),
+
+  setUser: (partial) =>
+    set((state) => ({ user: { ...state.user, ...partial } })),
+
+  setLoading: (isLoading) => set({ isLoading }),
+
+  addEpochRecord: (record) =>
+    set((state) => {
+      if (state.epochs.some((e) => e.epoch === record.epoch)) return state;
+      return { epochs: [...state.epochs, record].sort((a, b) => a.epoch - b.epoch) };
+    }),
+
+  // ── UI Actions ──
   selectCreature: (c) => set({ selectedCreature: c }),
 
   openInspector: (c) =>
@@ -40,14 +81,9 @@ export const useEcosystemStore = create<EcosystemStore>((set) => ({
   closeInspector: () =>
     set({ selectedCreature: null, isInspectorOpen: false }),
 
+  // ── Write actions (optimistic) ──
   deposit: (amount) =>
     set((state) => ({
-      user: {
-        ...state.user,
-        deposited: state.user.deposited + amount,
-        shares: state.user.shares + Math.floor(amount / 1000),
-        shareValue: state.user.shareValue + amount,
-      },
       ecosystem: {
         ...state.ecosystem,
         totalDeposits: state.ecosystem.totalDeposits + amount,
@@ -56,18 +92,9 @@ export const useEcosystemStore = create<EcosystemStore>((set) => ({
 
   withdraw: (amount) =>
     set((state) => ({
-      user: {
-        ...state.user,
-        deposited: Math.max(0, state.user.deposited - amount),
-        shares: Math.max(0, state.user.shares - Math.floor(amount / 1000)),
-        shareValue: Math.max(0, state.user.shareValue - amount),
-      },
       ecosystem: {
         ...state.ecosystem,
-        totalDeposits: Math.max(
-          0,
-          state.ecosystem.totalDeposits - amount
-        ),
+        totalDeposits: Math.max(0, state.ecosystem.totalDeposits - amount),
       },
     })),
 }));

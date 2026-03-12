@@ -190,6 +190,18 @@ contract Creature is ICreature {
         emit CapitalReceived(address(this), amount);
     }
 
+    /// @inheritdoc ICreature
+    /// @dev Called by Ecosystem to recall capital for user withdrawals.
+    function returnCapital(uint256 amount) external override onlyEcosystem onlyAlive {
+        uint256 toReturn = amount;
+        uint256 currentBal = stablecoin.balanceOf(address(this));
+        if (toReturn > currentBal) toReturn = currentBal;
+        if (toReturn == 0) return;
+
+        stablecoin.safeTransfer(ecosystem, toReturn);
+        balance = stablecoin.balanceOf(address(this));
+    }
+
     // ----------------------------------------------------------------
     // Views
     // ----------------------------------------------------------------
