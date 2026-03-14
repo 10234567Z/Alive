@@ -156,8 +156,13 @@ Files:
 - `GenePool.sol` — Manages reproduction. Receives fitness rankings from the Evolution Engine. Selects parents, creates offspring DNA via crossover and mutation, kills underperformers, spawns new Creature contracts.
 - `CreatureFactory.sol` — Factory pattern for deploying new Creature contracts. Uses CREATE2 for deterministic addressing.
 - `interfaces/IEvolutionEngine.sol` — Interface for calling the PVM Evolution Engine from Solidity.
+- `interfaces/IXCM.sol` — High-level XCM adapter interface that Creatures call to deploy capital cross-chain.
+- `interfaces/IPolkadotXcm.sol` — Real Polkadot Hub XCM precompile interface at `0x0...0A0000` (execute, send, weighMessage with SCALE-encoded messages).
+- `xcm/ScaleCodec.sol` — SCALE encoding library for building XCM messages in Solidity (compact integers, LE encoding, Location/Junction/Asset encoding).
+- `xcm/XCMMessageBuilder.sol` — Builds SCALE-encoded XCM V4 programs (TransferReserveAsset, WithdrawAsset+DepositReserveAsset with inner BuyExecution+DepositAsset).
+- `xcm/XCMRouter.sol` — Dual-mode XCM adapter (PRODUCTION: real precompile calls, SIMULATION: local token transfers for testing). Maps ERC20 tokens to pallet-assets GeneralIndex (USDT=1984, USDC=1337).
 
-Dependencies: OpenZeppelin (ERC20, Ownable, ReentrancyGuard), XCM precompile interface.
+Dependencies: OpenZeppelin (ERC20, SafeERC20), XCM precompile interface.
 
 ### Module 2: Evolution Engine (Rust / PVM)
 
@@ -244,14 +249,26 @@ polka/
 │   │   ├── Creature.sol
 │   │   ├── GenePool.sol
 │   │   ├── CreatureFactory.sol
-│   │   └── interfaces/
-│   │       └── IEvolutionEngine.sol
+│   │   ├── interfaces/
+│   │   │   ├── IEvolutionEngine.sol
+│   │   │   ├── ICreature.sol
+│   │   │   ├── IXCM.sol
+│   │   │   └── IPolkadotXcm.sol
+│   │   └── xcm/
+│   │       ├── ScaleCodec.sol
+│   │       ├── XCMMessageBuilder.sol
+│   │       └── XCMRouter.sol
 │   ├── test/
-│   │   ├── Ecosystem.t.sol
-│   │   ├── Creature.t.sol
-│   │   ├── GenePool.t.sol
-│   │   └── integration/
+│   │   ├── ALIVE.t.sol
+│   │   ├── Evolution.t.sol
+│   │   ├── XCMRouter.t.sol
+│   │   └── mocks/
+│   │       ├── MockXCM.sol
+│   │       ├── MockStablecoin.sol
+│   │       └── MockEvolutionEngine.sol
 │   ├── script/
+│   │   ├── Deploy.s.sol
+│   │   └── DeployProduction.s.sol
 │   └── foundry.toml
 ├── pvm/
 │   ├── src/

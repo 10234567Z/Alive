@@ -112,6 +112,14 @@ export const EcosystemABI = [
     outputs: [{ name: "", type: "uint256" }],
     stateMutability: "view",
   },
+  {
+    type: "event",
+    name: "EpochAdvanced",
+    inputs: [
+      { name: "epoch", type: "uint256", indexed: true },
+      { name: "phase", type: "uint8", indexed: false },
+    ],
+  },
 ] as const;
 
 export const CreatureABI = [
@@ -191,6 +199,44 @@ export const CreatureABI = [
     type: "function",
     name: "birthEpoch",
     inputs: [],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+] as const;
+
+export const GenePoolABI = [
+  {
+    type: "event",
+    name: "EvolutionRun",
+    inputs: [
+      { name: "epoch", type: "uint256", indexed: false },
+      { name: "totalCreatures", type: "uint256", indexed: false },
+      { name: "killed", type: "uint256", indexed: false },
+      { name: "bred", type: "uint256", indexed: false },
+    ],
+  },
+  {
+    type: "event",
+    name: "CreatureKilled",
+    inputs: [
+      { name: "creature", type: "address", indexed: true },
+      { name: "fitnessScore", type: "uint256", indexed: false },
+    ],
+  },
+  {
+    type: "event",
+    name: "CreatureBred",
+    inputs: [
+      { name: "offspring", type: "address", indexed: true },
+      { name: "parent1", type: "address", indexed: true },
+      { name: "parent2", type: "address", indexed: true },
+      { name: "generation", type: "uint256", indexed: false },
+    ],
+  },
+  {
+    type: "function",
+    name: "getFitness",
+    inputs: [{ name: "creature", type: "address" }],
     outputs: [{ name: "", type: "uint256" }],
     stateMutability: "view",
   },
