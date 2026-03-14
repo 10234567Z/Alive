@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════════════════
 #  ALIVE — Auto Epoch Runner
-#  Continuously advances epochs: mine blocks → feed → harvest → evolve
-#  → allocate, with simulated yield minted to creature contracts.
+#  Continuously advances epochs: mine blocks → feed → simulate XCM returns
+#  → harvest → evolve → allocate
+#
+#  Now uses MockXCM.simulateReturns() instead of minting tokens directly,
+#  which creates realistic cross-chain capital flow:
+#    1. FEED: Creatures deploy capital via XCM (tokens actually leave)
+#    2. SIMULATE: MockXCM returns capital + yield (tokens come back)
+#    3. HARVEST: Creatures measure real balance changes
+#    4. EVOLVE: Evolution engine scores fitness (real data!)
+#    5. ALLOCATE: Capital redistributed by fitness-weighted allocation
 #
 #  Usage:
 #    ./scripts/epoch-runner.sh              # Run continuously (default 15s interval)
@@ -17,9 +25,10 @@ RPC="${RPC_URL:-http://localhost:8545}"
 KEY="${PRIVATE_KEY:-0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80}"
 ECOSYSTEM="${ECOSYSTEM_ADDRESS:-0x07882Ae1ecB7429a84f1D53048d35c4bB2056877}"
 STABLECOIN="${STABLECOIN_ADDRESS:-0xF8e31cb472bc70500f08Cd84917E5A1912Ec8397}"
+XCM="${XCM_ADDRESS:-0xc96304e3c037f81dA488ed9dEa1D8F2a48278a75}"
 EPOCH_BLOCKS=100  # epochDuration in the contract
-YIELD_MIN=50000000    # 50 USDC minimum yield per creature (6 decimals)
-YIELD_MAX=200000000   # 200 USDC maximum yield per creature (6 decimals)
+YIELD_BPS_MIN=200   # 2% minimum yield per epoch
+YIELD_BPS_MAX=800   # 8% maximum yield per epoch
 INTERVAL="${INTERVAL:-15}"  # seconds between epoch cycles
 ONCE=false
 
@@ -62,30 +71,27 @@ get_creatures() {
   echo "${creatures[@]}"
 }
 
-# ── Mint simulated yield to creatures ─────────────────────────────
-mint_yield() {
-  local creatures=($@)
-  local total_minted=0
+# ── Simulate XCM yield returns ────────────────────────────────────
+simulate_xcm_returns() {
+  # Random yield between YIELD_BPS_MIN and YIELD_BPS_MAX
+  local yield_bps=$(( RANDOM % (YIELD_BPS_MAX - YIELD_BPS_MIN) + YIELD_BPS_MIN ))
+  
+  # Check if there are outstanding deployments
+  local dep_count
+  dep_count=$(cast call "$XCM" "deploymentCount()(uint256)" --rpc-url "$RPC" 2>/dev/null | head -1 | tr -d ' ')
+  
+  if [[ "$dep_count" == "0" ]]; then
+    ok "No outstanding deployments to return"
+    return
+  fi
 
-  for creature in "${creatures[@]}"; do
-    # Check if creature is alive
-    local alive
-    alive=$(cast call "$creature" "isAlive()(bool)" --rpc-url "$RPC" 2>/dev/null | head -1)
-    if [[ "$alive" != "true" ]]; then
-      continue
-    fi
-
-    # Random yield between YIELD_MIN and YIELD_MAX
-    local yield_amount=$(( RANDOM % (YIELD_MAX - YIELD_MIN) + YIELD_MIN ))
-    
-    # Mint directly to creature contract (simulates DeFi yield)
-    quiet_send "$STABLECOIN" "mint(address,uint256)" "$creature" "$yield_amount" 2>/dev/null && {
-      total_minted=$((total_minted + yield_amount))
-    }
-  done
-
-  local total_usd=$(echo "scale=2; $total_minted / 1000000" | bc 2>/dev/null || echo "$total_minted")
-  ok "Minted \$${total_usd} simulated yield across ${#creatures[@]} creatures"
+  # Call MockXCM.simulateReturns(yieldBps) — returns all deployed capital + yield
+  if quiet_send "$XCM" "simulateReturns(uint256)" "$yield_bps"; then
+    local yield_pct=$(echo "scale=1; $yield_bps / 100" | bc 2>/dev/null || echo "$yield_bps bps")
+    ok "XCM returned capital + ${yield_pct}% yield for $dep_count deployments"
+  else
+    err "MockXCM.simulateReturns failed"
+  fi
 }
 
 # ── Run one full epoch cycle ──────────────────────────────────────
@@ -101,27 +107,27 @@ run_epoch() {
   cast rpc anvil_mine "$(printf '0x%x' $EPOCH_BLOCKS)" --rpc-url "$RPC" > /dev/null 2>&1
   ok "Mined $EPOCH_BLOCKS blocks"
 
-  # Get creatures for yield simulation
+  # Get creatures for reporting
   local creatures
   creatures=($(get_creatures))
   local count=${#creatures[@]}
   log "Active creatures: $count"
 
-  # Phase 1: IDLE → FEEDING (includes _feedAll)
-  log "Phase 1: FEEDING..."
+  # Phase 1: IDLE → FEEDING (includes _feedAll — creatures deploy capital via XCM)
+  log "Phase 1: FEEDING (creatures deploy capital via XCM)..."
   if quiet_send "$ECOSYSTEM" "advanceEpoch()"; then
-    ok "FEEDING complete"
+    ok "FEEDING complete — capital deployed to parachains"
   else
     err "FEEDING failed"
     return 1
   fi
 
-  # Mint simulated yield BEFORE harvest (so harvest sees the gains)
-  log "Simulating DeFi yield..."
-  mint_yield "${creatures[@]}"
+  # Simulate XCM returns BEFORE harvest (capital + yield returns from parachains)
+  log "Simulating cross-chain DeFi returns..."
+  simulate_xcm_returns
 
-  # Phase 2: HARVESTING
-  log "Phase 2: HARVESTING..."
+  # Phase 2: HARVESTING (creatures measure real returns)
+  log "Phase 2: HARVESTING (creatures measure returns)..."
   if quiet_send "$ECOSYSTEM" "advanceEpoch()"; then
     ok "HARVESTING complete"
   else
@@ -129,8 +135,8 @@ run_epoch() {
     return 1
   fi
 
-  # Phase 3: EVOLVING
-  log "Phase 3: EVOLVING..."
+  # Phase 3: EVOLVING (fitness scoring, selection, breeding, killing)
+  log "Phase 3: EVOLVING (fitness scoring + natural selection)..."
   if quiet_send "$ECOSYSTEM" "advanceEpoch()"; then
     ok "EVOLVING complete"
   else
@@ -138,8 +144,8 @@ run_epoch() {
     return 1
   fi
 
-  # Phase 4: ALLOCATING (recalls + redistributes capital)
-  log "Phase 4: ALLOCATING..."
+  # Phase 4: ALLOCATING (fitness-weighted capital redistribution)
+  log "Phase 4: ALLOCATING (fitness-weighted redistribution)..."
   if quiet_send "$ECOSYSTEM" "advanceEpoch()"; then
     ok "ALLOCATING complete"
   else
@@ -154,11 +160,13 @@ run_epoch() {
   local total_value=$(echo "$state" | head -1 | tr -d ' []' | awk '{print $1}')
   local total_usd=$(echo "scale=2; $total_value / 1000000" | bc 2>/dev/null || echo "$total_value")
   local epoch=$(echo "$state" | sed -n '2p' | tr -d ' []' | awk '{print $1}')
+  local creature_count=$(echo "$state" | sed -n '3p' | tr -d ' []' | awk '{print $1}')
   local yield_raw=$(echo "$state" | sed -n '4p' | tr -d ' []' | awk '{print $1}')
   
   log "═══ Epoch $epoch complete ═══"
   ok "Total system value: \$$total_usd"
-  ok "Total yield generated: $yield_raw wei"
+  ok "Active creatures: $creature_count"
+  ok "Total yield generated: $yield_raw"
   echo ""
 }
 
@@ -167,7 +175,8 @@ echo ""
 echo "  ╔═══════════════════════════════════════════╗"
 echo "  ║   🧬 ALIVE — Auto Epoch Runner            ║"
 echo "  ║   Ecosystem: ${ECOSYSTEM:0:10}...         ║"
-echo "  ║   Interval: ${INTERVAL}s                          ║"
+echo "  ║   XCM:       ${XCM:0:10}...               ║"
+echo "  ║   Interval:  ${INTERVAL}s                         ║"
 echo "  ╚═══════════════════════════════════════════╝"
 echo ""
 

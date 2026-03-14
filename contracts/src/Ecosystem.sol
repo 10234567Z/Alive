@@ -260,7 +260,8 @@ contract Ecosystem {
 
     /// @dev Recall capital from creatures back to the vault.
     ///      Used when a user withdraws and the vault doesn't have enough.
-    ///      Proportionally recalls from all alive creatures.
+    ///      Proportionally recalls from all alive creatures, then does a
+    ///      second pass to cover any rounding shortfall.
     function _recallCapital(uint256 needed) internal {
         uint256 totalCreatureBal = 0;
         for (uint256 i = 0; i < activeCreatures.length; i++) {
@@ -268,7 +269,9 @@ contract Ecosystem {
         }
         if (totalCreatureBal == 0) return;
 
-        // Recall proportionally from each creature
+        uint256 remaining = needed;
+
+        // First pass: proportional recall
         for (uint256 i = 0; i < activeCreatures.length; i++) {
             uint256 creatureBal = stablecoin.balanceOf(activeCreatures[i]);
             if (creatureBal == 0) continue;
@@ -278,6 +281,24 @@ contract Ecosystem {
             if (recallAmount == 0) continue;
 
             ICreature(activeCreatures[i]).returnCapital(recallAmount);
+            if (remaining > recallAmount) {
+                remaining -= recallAmount;
+            } else {
+                remaining = 0;
+            }
+        }
+
+        // Second pass: cover rounding shortfall from any creature with balance
+        if (remaining > 0) {
+            for (uint256 i = 0; i < activeCreatures.length; i++) {
+                if (remaining == 0) break;
+                uint256 creatureBal = stablecoin.balanceOf(activeCreatures[i]);
+                if (creatureBal == 0) continue;
+
+                uint256 extra = remaining > creatureBal ? creatureBal : remaining;
+                ICreature(activeCreatures[i]).returnCapital(extra);
+                remaining -= extra;
+            }
         }
     }
 
@@ -317,10 +338,21 @@ contract Ecosystem {
         // Run GenePool's evolution algorithm
         address[] memory newPop = genePool.runEvolution(activeCreatures, currentEpoch);
 
+        // Store fitness scores from the evolution run into latestFitness
+        totalFitness = 0;
+        for (uint256 i = 0; i < activeCreatures.length; i++) {
+            uint256 score = genePool.getFitness(activeCreatures[i]);
+            latestFitness[activeCreatures[i]] = score;
+            totalFitness += score;
+        }
+
         // Process kills: GenePool stores pending kills for us to execute
         address[] memory kills = genePool.getPendingKills();
         for (uint256 i = 0; i < kills.length; i++) {
             ICreature(kills[i]).kill();
+            // Clear fitness for killed creatures
+            totalFitness -= latestFitness[kills[i]];
+            latestFitness[kills[i]] = 0;
         }
 
         // Replace active population
@@ -379,13 +411,10 @@ contract Ecosystem {
         for (uint256 i = 0; i < creatureCount; i++) {
             if (!ICreature(activeCreatures[i]).isAlive()) continue;
 
-            (, int256 cr, uint256 es, , ) = ICreature(activeCreatures[i]).getPerformance();
+            // Use real fitness scores from the evolution engine
+            uint256 w = latestFitness[activeCreatures[i]];
+            if (w == 0) w = 1; // minimum weight so every creature gets something
 
-            // Weight = epochsSurvived + bonus for positive cumulative return
-            uint256 w = es + 1; // at least 1
-            if (cr > 0) {
-                w += uint256(cr) / 1e18; // scale down if using 18-decimal tokens
-            }
             weights[i] = w;
             totalWeight += w;
         }

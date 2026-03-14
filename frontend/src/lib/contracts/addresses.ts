@@ -27,12 +27,12 @@ export const westendAssetHub = defineChain({
 // ── Deployed addresses (filled from deployments/local.json) ──
 // When deploying to testnet, update these with real addresses.
 export const CONTRACTS = {
-  stablecoin: "0xF8e31cb472bc70500f08Cd84917E5A1912Ec8397" as `0x${string}`,
-  xcm: "0xc96304e3c037f81dA488ed9dEa1D8F2a48278a75" as `0x${string}`,
-  evolutionEngine: "0x34B40BA116d5Dec75548a9e9A8f15411461E8c70" as `0x${string}`,
-  factory: "0xD0141E899a65C95a556fE2B27e5982A6DE7fDD7A" as `0x${string}`,
-  ecosystem: "0x07882Ae1ecB7429a84f1D53048d35c4bB2056877" as `0x${string}`,
-  genePool: "0x22753E4264FDDc6181dc7cce468904A80a363E44" as `0x${string}`,
+  stablecoin: "0x115686C5B6256B7b8Aa426d75fC4DEa6354A59De" as `0x${string}`,
+  xcm: "0x2948dcd1B5537E3C0a596716b908AE23ab06CDa9" as `0x${string}`,
+  evolutionEngine: "0x1f9f7A61d5d8A2CbcAe46ce67ADb5b11D244B24F" as `0x${string}`,
+  factory: "0x4182AE5ebCf3703AD3ADB95df08a1FaDF2dFeB62" as `0x${string}`,
+  ecosystem: "0x5c381F8Fb58622beD71119dEA591e7aeF5Bc52F0" as `0x${string}`,
+  genePool: "0x8525A10eeBF11E689F4a456A2AE172eaC9DaD6C9" as `0x${string}`,
 } as const;
 
 // ── Active chain (switch between dev and testnet) ──

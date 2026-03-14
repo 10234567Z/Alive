@@ -6,9 +6,9 @@ import {Ecosystem} from "../src/Ecosystem.sol";
 import {Creature} from "../src/Creature.sol";
 import {CreatureFactory} from "../src/CreatureFactory.sol";
 import {GenePool} from "../src/GenePool.sol";
+import {EvolutionEngine} from "../src/EvolutionEngine.sol";
 import {MockStablecoin} from "../test/mocks/MockStablecoin.sol";
 import {MockXCM} from "../test/mocks/MockXCM.sol";
-import {MockEvolutionEngine} from "../test/mocks/MockEvolutionEngine.sol";
 
 /// @title Deploy
 /// @notice Foundry deployment script for the ALIVE Protocol.
@@ -17,8 +17,8 @@ import {MockEvolutionEngine} from "../test/mocks/MockEvolutionEngine.sol";
 ///
 ///         Deploy Order:
 ///         1. MockStablecoin (testnet USDC)
-///         2. MockXCM (XCM precompile stand-in)
-///         3. MockEvolutionEngine (PVM engine stand-in)
+///         2. MockXCM (XCM precompile simulation — actually transfers tokens)
+///         3. EvolutionEngine (production PVM engine — real fitness/crossover/mutation)
 ///         4. CreatureFactory(stablecoin, xcmPrecompile)
 ///         5. Ecosystem(stablecoin, factory, epochDuration)
 ///         6. GenePool(ecosystem, factory, evolutionEngine,
@@ -26,6 +26,7 @@ import {MockEvolutionEngine} from "../test/mocks/MockEvolutionEngine.sol";
 ///            maxPopulation, seeder)
 ///         7. Wire: factory.setEcosystem(), factory.setGenePool(),
 ///            ecosystem.setGenePool()
+///         8. Mint yield supply to MockXCM for return simulation
 contract Deploy is Script {
     // ----- Config -----
     uint256 constant EPOCH_DURATION = 100; // blocks per epoch
@@ -34,6 +35,7 @@ contract Deploy is Script {
     uint256 constant MUTATION_RATE = 1000; // 10%
     uint256 constant MAX_POPULATION = 100; // max creatures
     uint256 constant INITIAL_MINT = 1_000_000e6; // 1M USDC (6 decimals)
+    uint256 constant XCM_YIELD_SUPPLY = 500_000e6; // 500K USDC for yield simulation
 
     function run() external {
         uint256 deployerPK = vm.envUint("PRIVATE_KEY");
@@ -53,13 +55,18 @@ contract Deploy is Script {
         stablecoin.mint(deployer, INITIAL_MINT);
         console2.log("   Minted", INITIAL_MINT / 1e6, "USDC to deployer");
 
-        // ---- Step 2: Deploy MockXCM ----
+        // ---- Step 2: Deploy MockXCM (realistic token transfer simulation) ----
         MockXCM xcm = new MockXCM();
         console2.log("2. MockXCM:", address(xcm));
 
-        // ---- Step 3: Deploy MockEvolutionEngine ----
-        MockEvolutionEngine evolutionEngine = new MockEvolutionEngine();
-        console2.log("3. MockEvolutionEngine:", address(evolutionEngine));
+        // Mint yield supply to MockXCM so it can pay out returns
+        stablecoin.mint(address(xcm), XCM_YIELD_SUPPLY);
+        console2.log("   Minted", XCM_YIELD_SUPPLY / 1e6, "USDC to MockXCM for yields");
+
+        // ---- Step 3: Deploy EvolutionEngine (REAL, not mock) ----
+        EvolutionEngine evolutionEngine = new EvolutionEngine();
+        console2.log("3. EvolutionEngine:", address(evolutionEngine));
+        console2.log("   (Real fitness/crossover/mutation - ports PVM Rust logic)");
 
         // ---- Step 4: Deploy CreatureFactory ----
         CreatureFactory factory = new CreatureFactory(

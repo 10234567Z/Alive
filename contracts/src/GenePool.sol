@@ -36,6 +36,12 @@ contract GenePool {
     /// @notice Address authorized to inject seed Creatures (AI Seeder).
     address public seeder;
 
+    /// @notice Per-creature fitness scores from the last evolution run.
+    mapping(address => uint256) public lastFitnessScores;
+
+    /// @notice Addresses of all creatures scored in the last evolution run.
+    address[] internal _lastScoredCreatures;
+
     // ----------------------------------------------------------------
     // Events
     // ----------------------------------------------------------------
@@ -138,6 +144,18 @@ contract GenePool {
         // 2. Call PVM Evolution Engine for fitness scoring
         IEvolutionEngine.FitnessResult[] memory results =
             evolutionEngine.evaluateFitness(records);
+
+        // 2b. Store fitness scores for Ecosystem to read
+        //     Clear previous scores first
+        for (uint256 i = 0; i < _lastScoredCreatures.length; i++) {
+            delete lastFitnessScores[_lastScoredCreatures[i]];
+        }
+        delete _lastScoredCreatures;
+
+        for (uint256 i = 0; i < results.length; i++) {
+            lastFitnessScores[results[i].creatureAddr] = results[i].fitnessScore;
+            _lastScoredCreatures.push(results[i].creatureAddr);
+        }
 
         // results is sorted descending by fitnessScore
         // 3. Determine kill and parent thresholds
@@ -274,5 +292,19 @@ contract GenePool {
         );
         require(ok, "GenePool: failed to register creature");
         emit SeedInjected(creature);
+    }
+
+    // ----------------------------------------------------------------
+    // Views
+    // ----------------------------------------------------------------
+
+    /// @notice Get the fitness score for a creature from the last evolution run.
+    function getFitness(address creature) external view returns (uint256) {
+        return lastFitnessScores[creature];
+    }
+
+    /// @notice Get all scored creature addresses from the last evolution run.
+    function getLastScoredCreatures() external view returns (address[] memory) {
+        return _lastScoredCreatures;
     }
 }
