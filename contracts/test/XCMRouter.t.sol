@@ -342,7 +342,7 @@ contract XCMRouterTest is Test {
         uint256 aliceBefore = usdc.balanceOf(alice);
 
         // Simulate specific yield for alice
-        router.simulateReturnForCreature(alice, address(usdc), 100e6);
+        router.simulateReturnForCreature(alice, address(usdc), int256(100e6));
 
         // Alice should get back 1000 + 100 = 1100
         assertEq(usdc.balanceOf(alice), aliceBefore + 1100e6);

@@ -15,10 +15,39 @@ import {
 import { useEcosystemStore } from "@/stores/ecosystem";
 import { GitBranch, Skull, TrendingUp, Users } from "lucide-react";
 import { useMounted } from "@/lib/use-mounted";
+import { useRef, useEffect, useCallback } from "react";
 
 export default function EpochTimeline() {
   const mounted = useMounted();
   const { epochs } = useEcosystemStore();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+  const dragStartX = useRef(0);
+  const scrollStartX = useRef(0);
+
+  // Auto-scroll to the latest epoch
+  useEffect(() => {
+    if (scrollRef.current && epochs.length > 0) {
+      scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+    }
+  }, [epochs.length]);
+
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    isDragging.current = true;
+    dragStartX.current = e.clientX;
+    scrollStartX.current = scrollRef.current?.scrollLeft ?? 0;
+    e.preventDefault();
+  }, []);
+
+  const onMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDragging.current || !scrollRef.current) return;
+    const dx = e.clientX - dragStartX.current;
+    scrollRef.current.scrollLeft = scrollStartX.current - dx;
+  }, []);
+
+  const onMouseUp = useCallback(() => {
+    isDragging.current = false;
+  }, []);
 
   if (!mounted) return null;
 
@@ -45,7 +74,7 @@ export default function EpochTimeline() {
               />
               <YAxis
                 tick={{ fontFamily: "'JetBrains Mono'", fontSize: 11 }}
-                tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+                domain={[0, 75]}
               />
               <Tooltip
                 contentStyle={{
@@ -56,7 +85,7 @@ export default function EpochTimeline() {
                   fontSize: 12,
                   boxShadow: "4px 4px 0 0 rgba(0,0,0,0.9)",
                 }}
-                formatter={(v) => [`${(Number(v) / 1000).toFixed(1)}k`, "Top Fitness"]}
+                formatter={(v) => [`${Number(v)}`, "Top Fitness"]}
                 labelFormatter={(v) => `Epoch ${v}`}
               />
               <Area
@@ -160,28 +189,37 @@ export default function EpochTimeline() {
       </div>
 
       {/* Epoch Cards Strip */}
-      <div className="overflow-x-auto pb-2">
-        <div className="flex gap-3 min-w-max">
+      <div
+        ref={scrollRef}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseUp}
+        className="overflow-x-auto pb-4 pt-3 cursor-grab active:cursor-grabbing relative z-10 scrollbar-hide"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        <div className="flex gap-5 min-w-max select-none px-1">
           {epochs.map((ep, i) => (
             <motion.div
               key={ep.epoch}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.05 }}
-              className="bg-nb-card border-3 border-nb-ink rounded-nb p-4 min-w-[140px] shadow-nb-sm hover:-translate-y-1 hover:shadow-nb transition-all"
+              className="bg-nb-card border-3 border-nb-ink rounded-nb px-5 py-4 min-w-[160px] shadow-nb-sm hover:-translate-y-1 hover:shadow-nb transition-all"
             >
-              <p className="font-display font-bold text-lg">E{ep.epoch}</p>
-              <div className="mt-2 space-y-1 text-xs font-mono">
-                <div className="flex justify-between">
-                  <span className="text-nb-ok">+{ep.births} born</span>
+              <p className="font-display font-bold text-xl mb-3">E{ep.epoch}</p>
+              <div className="space-y-2 text-xs font-mono">
+                <div>
+                  <span className="text-nb-ok font-semibold">+{ep.births} born</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-nb-error">-{ep.deaths} died</span>
+                <div>
+                  <span className="text-nb-error font-semibold">-{ep.deaths} died</span>
                 </div>
-                <div className="flex justify-between text-nb-ink/60">
+                <hr className="border-nb-ink/15" />
+                <div className="text-nb-ink/60">
                   <span>Pop: {ep.populationSize}</span>
                 </div>
-                <div className="flex justify-between text-nb-ink/60">
+                <div className="text-nb-ink/60">
                   <span>Yield: {ep.avgYield}%</span>
                 </div>
               </div>

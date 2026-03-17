@@ -77,7 +77,7 @@ export default function DashboardPage() {
                 <p className="text-xs font-mono text-nb-ink/50 uppercase">Avg Fitness</p>
               </div>
               <p className="font-display font-bold text-2xl">
-                {(avgFitness / 1000).toFixed(1)}
+                {avgFitness.toFixed(0)}
               </p>
             </motion.div>
 
@@ -177,15 +177,14 @@ export default function DashboardPage() {
                   </div>
                   <div className="text-right">
                     <p className="font-display font-bold">
-                      {(c.fitnessScore / 1000).toFixed(1)}
+                      {c.fitnessScore}
                     </p>
                     <p
                       className={`text-xs font-mono ${
                         c.performance.cumulativeReturn >= 0 ? "text-nb-ok" : "text-nb-error"
                       }`}
                     >
-                      {c.performance.cumulativeReturn >= 0 ? "+" : ""}
-                      {(c.performance.cumulativeReturn / 1000).toFixed(1)}%
+                      {c.performance.cumulativeReturn >= 0 ? "+" : "-"}${(Math.abs(c.performance.cumulativeReturn) / 1e6).toFixed(0)}
                     </p>
                   </div>
                 </div>

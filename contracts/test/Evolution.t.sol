@@ -127,14 +127,16 @@ contract EvolutionTest is Test {
             lastReturn: 50e6,      // +50 USDC
             cumulativeReturn: 500e6, // +500 USDC
             epochsSurvived: 5,
-            maxDrawdown: -50e6
+            maxDrawdown: -50e6,
+            balance: 10_000e6
         });
         records[1] = IEvolutionEngine.PerformanceRecord({
             creatureAddr: address(2),
             lastReturn: -100e6,
             cumulativeReturn: -200e6,
             epochsSurvived: 5,
-            maxDrawdown: -300e6
+            maxDrawdown: -300e6,
+            balance: 10_000e6
         });
 
         IEvolutionEngine.FitnessResult[] memory results = evoEngine.evaluateFitness(records);
@@ -150,14 +152,16 @@ contract EvolutionTest is Test {
             lastReturn: 30e6,
             cumulativeReturn: 300e6,
             epochsSurvived: 5,
-            maxDrawdown: -10e6     // small drawdown
+            maxDrawdown: -10e6,     // small drawdown
+            balance: 10_000e6
         });
         records[1] = IEvolutionEngine.PerformanceRecord({
             creatureAddr: address(2),
             lastReturn: 30e6,
             cumulativeReturn: 300e6,
             epochsSurvived: 5,
-            maxDrawdown: -500e6    // large drawdown
+            maxDrawdown: -500e6,    // large drawdown
+            balance: 10_000e6
         });
 
         IEvolutionEngine.FitnessResult[] memory results = evoEngine.evaluateFitness(records);
@@ -173,14 +177,16 @@ contract EvolutionTest is Test {
             lastReturn: 10e6,
             cumulativeReturn: 150e6,
             epochsSurvived: 15,
-            maxDrawdown: -20e6
+            maxDrawdown: -20e6,
+            balance: 10_000e6
         });
         records[1] = IEvolutionEngine.PerformanceRecord({
             creatureAddr: address(2),
             lastReturn: 10e6,
             cumulativeReturn: 10e6,
             epochsSurvived: 1,
-            maxDrawdown: -20e6
+            maxDrawdown: -20e6,
+            balance: 10_000e6
         });
 
         IEvolutionEngine.FitnessResult[] memory results = evoEngine.evaluateFitness(records);
@@ -195,21 +201,24 @@ contract EvolutionTest is Test {
             lastReturn: -100e6,
             cumulativeReturn: -100e6,
             epochsSurvived: 3,
-            maxDrawdown: -200e6
+            maxDrawdown: -200e6,
+            balance: 10_000e6
         });
         records[1] = IEvolutionEngine.PerformanceRecord({
             creatureAddr: address(2),
             lastReturn: 50e6,
             cumulativeReturn: 500e6,
             epochsSurvived: 5,
-            maxDrawdown: -10e6
+            maxDrawdown: -10e6,
+            balance: 10_000e6
         });
         records[2] = IEvolutionEngine.PerformanceRecord({
             creatureAddr: address(3),
             lastReturn: 20e6,
             cumulativeReturn: 200e6,
             epochsSurvived: 4,
-            maxDrawdown: -50e6
+            maxDrawdown: -50e6,
+            balance: 10_000e6
         });
 
         IEvolutionEngine.FitnessResult[] memory results = evoEngine.evaluateFitness(records);

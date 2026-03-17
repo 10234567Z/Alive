@@ -8,11 +8,14 @@ import {ICreature} from "./interfaces/ICreature.sol";
 /// @notice Production evolution engine implementing the same algorithms as
 ///         the PVM Rust engine (pvm/src/fitness.rs, crossover.rs, mutation.rs).
 ///
-///         Fitness formula (matching Rust):
-///           fitness = annualized_return × 40
-///                   + sharpe_proxy      × 30
-///                   - drawdown_penalty  × 20
-///                   + survival_bonus    × 10
+///         Fitness formula (matching Rust) — output range 0–100:
+///           fitness = annualized_return  (0–50)
+///                   + sharpe_proxy       (0–30)
+///                   - drawdown_penalty   (0–20)
+///                   + survival_bonus     (0–20)
+///
+///         Returns are normalized to basis points relative to creature
+///         balance so the score is capital-independent.
 ///
 ///         Crossover: Uniform crossover using seed bits per DNA field.
 ///         Mutation:  xorshift64 PRNG with per-field range-bounded mutation.
@@ -52,60 +55,70 @@ contract EvolutionEngine is IEvolutionEngine {
         }
     }
 
-    /// @dev Multi-factor fitness scoring, ported from pvm/src/fitness.rs::compute_fitness.
+    /// @dev Multi-factor fitness scoring — output in [0, 100].
+    ///      Ported from pvm/src/fitness.rs::compute_fitness.
     ///
-    ///      All intermediate values are scaled to avoid floating point.
-    ///      Input returns are in raw stablecoin units (USDC 6 decimals).
+    ///      Returns are normalised to basis points relative to balance
+    ///      so the score is independent of capital magnitude.
     ///
     ///      Components:
-    ///        1. Annualized return (weight 40) — avg return per epoch, shifted positive
-    ///        2. Sharpe proxy    (weight 30) — avg return / (|maxDrawdown| + 1)
-    ///        3. Drawdown penalty (weight 20) — penalizes worst-epoch losses
-    ///        4. Survival bonus   (weight 10) — rewards longevity, capped at 20 epochs
+    ///        1. Return component  (0–40) — avg return rate per epoch (linear, not capped early)
+    ///        2. Sharpe proxy      (0–25) — return / (drawdown + return)
+    ///        3. Drawdown penalty   (0–25) — worst-epoch loss as % of balance
+    ///        4. Survival bonus     (0–10) — 0.5 point per epoch, cap at 10
     function _computeFitness(PerformanceRecord calldata r) internal pure returns (uint256) {
         uint256 epochs = r.epochsSurvived == 0 ? 1 : r.epochsSurvived;
 
-        // ── 1. Annualized return component (weight 40) ──────────────
-        //
-        // average_return_per_epoch = cumulativeReturn / epochs
-        // Shift by +10_000_000 (10 USDC) so even moderately negative returns > 0
-        int256 avgReturn = r.cumulativeReturn / int256(epochs);
-        int256 shiftedSigned = avgReturn + 10_000_000;
-        if (shiftedSigned < 0) shiftedSigned = 0;
-        uint256 shiftedReturn = uint256(shiftedSigned);
-        uint256 annualizedComponent = (shiftedReturn * 40) / 10_000;
-
-        // ── 2. Sharpe-like ratio component (weight 30) ──────────────
-        //
-        // sharpe_proxy = shiftedReturn / (|maxDrawdown| + 1)
-        // Larger drawdowns penalize the ratio.
-        uint256 ddAbs;
-        if (r.maxDrawdown < 0) {
-            ddAbs = uint256(-r.maxDrawdown);
-        }
-        // else ddAbs = 0
-
-        uint256 sharpeProxy;
-        if (ddAbs == 0) {
-            sharpeProxy = shiftedReturn; // no drawdown → full credit
-        } else {
-            // Scale to maintain precision
-            sharpeProxy = (shiftedReturn * 1_000_000) / (ddAbs + 1);
-        }
-        uint256 sharpeComponent = (sharpeProxy * 30) / 10_000;
-
-        // ── 3. Drawdown penalty component (weight 20) ───────────────
-        uint256 drawdownPenalty = (ddAbs * 20) / 10_000;
-
-        // ── 4. Survival bonus component (weight 10) ─────────────────
-        //    Capped at 20 epochs to prevent immortality bias.
+        // ── 4. Survival bonus (0–10) ────────────────────────────────
+        //    0.5 points per epoch, max at 20 epochs = 10 pts
         uint256 survivalEpochs = epochs > 20 ? 20 : epochs;
-        uint256 survivalBonus = survivalEpochs * 10;
+        uint256 survivalBonus = survivalEpochs / 2; // 0.5 per epoch
 
-        // ── Combine ─────────────────────────────────────────────────
-        uint256 raw = annualizedComponent + sharpeComponent + survivalBonus;
+        // If creature has no balance, return survival-only score
+        if (r.balance == 0) return survivalBonus;
+
+        // ── Normalise returns to basis points relative to balance ───
+        //    avgReturnBps = (cumulativeReturn / epochs) * 10_000 / balance
+        int256 avgReturnRaw = r.cumulativeReturn / int256(epochs);
+        int256 avgReturnBps = (avgReturnRaw * 10_000) / int256(r.balance);
+
+        // ── 1. Return component (0–40) ──────────────────────────────
+        //    Linear mapping: -200 bps → 0, 0 bps → 10, 200 bps → 30, 300 bps → 40
+        //    Uses wider range so creatures differentiate across the spectrum
+        int256 returnScore = (avgReturnBps + 200) * 40 / 500;
+        if (returnScore < 0) returnScore = 0;
+        uint256 returnComponent = uint256(returnScore);
+        if (returnComponent > 40) returnComponent = 40;
+
+        // ── 2. Sharpe-like ratio (0–25) ─────────────────────────────
+        //    sharpe = returnBps / (ddBps + returnBps)  ×  25
+        //    Perfect (no drawdown) → 25,  equal risk/return → ~12
+        uint256 ddBps;
+        if (r.maxDrawdown < 0) {
+            ddBps = (uint256(-r.maxDrawdown) * 10_000) / r.balance;
+        }
+
+        uint256 sharpe;
+        if (ddBps == 0 && avgReturnBps > 0) {
+            sharpe = 25; // no drawdown with positive returns → full marks
+        } else if (ddBps == 0) {
+            sharpe = 10; // no drawdown, no returns → decent
+        } else if (avgReturnBps > 0) {
+            sharpe = (uint256(avgReturnBps) * 25) / (ddBps + uint256(avgReturnBps));
+        }
+        // else sharpe stays 0
+        if (sharpe > 25) sharpe = 25;
+
+        // ── 3. Drawdown penalty (0–25) ──────────────────────────────
+        //    Linear: 0% dd → 0 penalty, 50%+ dd → 25 penalty
+        uint256 drawdownPenalty = (ddBps * 25) / 5_000;
+        if (drawdownPenalty > 25) drawdownPenalty = 25;
+
+        // ── Combine (max 40 + 25 + 10 = 75 before penalty, 100 theoretical max) ──
+        uint256 raw = returnComponent + sharpe + survivalBonus;
         if (raw > drawdownPenalty) {
-            return raw - drawdownPenalty;
+            uint256 result = raw - drawdownPenalty;
+            return result > 100 ? 100 : result;
         }
         return 0;
     }

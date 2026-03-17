@@ -129,7 +129,7 @@ contract GenePool {
                 int256 cr,
                 uint256 es,
                 int256 md,
-                /* balance */
+                uint256 bal
             ) = ICreature(creatures[i]).getPerformance();
 
             records[i] = IEvolutionEngine.PerformanceRecord({
@@ -137,7 +137,8 @@ contract GenePool {
                 lastReturn: lr,
                 cumulativeReturn: cr,
                 epochsSurvived: es,
-                maxDrawdown: md
+                maxDrawdown: md,
+                balance: bal
             });
         }
 

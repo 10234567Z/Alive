@@ -128,16 +128,25 @@ contract MockXCM is IXCM {
     ///         Allows different creatures to earn different amounts (more realistic).
     /// @param creature The creature address.
     /// @param asset The stablecoin address.
-    /// @param yieldAmount The absolute yield amount to add.
+    /// @param yieldAmount The signed yield amount (positive = gain, negative = loss).
     function simulateReturnForCreature(
         address creature,
         address asset,
-        uint256 yieldAmount
+        int256 yieldAmount
     ) external {
         uint256 principal = deployedCapital[creature];
         if (principal == 0) return;
 
-        uint256 total = principal + yieldAmount;
+        uint256 total;
+        uint256 absYield;
+        if (yieldAmount >= 0) {
+            absYield = uint256(yieldAmount);
+            total = principal + absYield;
+        } else {
+            absYield = uint256(-yieldAmount);
+            total = absYield >= principal ? 0 : principal - absYield;
+        }
+
         deployedCapital[creature] = 0;
 
         // Remove matching deployments
@@ -156,8 +165,10 @@ contract MockXCM is IXCM {
             _deployments.pop();
         }
 
-        IERC20(asset).safeTransfer(creature, total);
-        emit ReturnsSimulated(creature, principal, yieldAmount, total);
+        if (total > 0) {
+            IERC20(asset).safeTransfer(creature, total);
+        }
+        emit ReturnsSimulated(creature, principal, absYield, total);
     }
 
     function callCount() external view returns (uint256) {

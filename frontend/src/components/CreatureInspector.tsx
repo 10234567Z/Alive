@@ -92,14 +92,14 @@ export default function CreatureInspector() {
                 <p className="text-xs font-mono text-nb-ink/60 uppercase mb-1">Fitness Score</p>
                 <div className="flex items-end gap-2">
                   <span className="font-display font-bold text-4xl">
-                    {(creature.fitnessScore / 1000).toFixed(1)}
+                    {creature.fitnessScore}
                   </span>
-                  <span className="text-sm font-mono text-nb-ink/50 pb-1">/ 100</span>
+                  <span className="text-sm font-mono text-nb-ink/50 pb-1">/ 75</span>
                 </div>
                 <div className="mt-2 w-full h-3 bg-nb-bg border-2 border-nb-ink rounded-full overflow-hidden">
                   <div
                     className="h-full bg-nb-accent transition-all"
-                    style={{ width: `${Math.min(100, creature.fitnessScore / 1000)}%` }}
+                    style={{ width: `${Math.min(100, (creature.fitnessScore / 75) * 100)}%` }}
                   />
                 </div>
               </div>
@@ -112,12 +112,12 @@ export default function CreatureInspector() {
                 <div className="grid grid-cols-2 gap-3">
                   <Stat
                     label="Last Return"
-                    value={`${creature.performance.lastReturn >= 0 ? "+" : ""}${(creature.performance.lastReturn / 1000).toFixed(1)}%`}
+                    value={`${creature.performance.lastReturn >= 0 ? "+" : ""}$${(Math.abs(creature.performance.lastReturn) / 1e6).toFixed(2)}`}
                     positive={creature.performance.lastReturn >= 0}
                   />
                   <Stat
                     label="Cumulative"
-                    value={`${creature.performance.cumulativeReturn >= 0 ? "+" : ""}${(creature.performance.cumulativeReturn / 1000).toFixed(1)}%`}
+                    value={`${creature.performance.cumulativeReturn >= 0 ? "+" : ""}$${(Math.abs(creature.performance.cumulativeReturn) / 1e6).toFixed(2)}`}
                     positive={creature.performance.cumulativeReturn >= 0}
                   />
                   <Stat
@@ -126,8 +126,8 @@ export default function CreatureInspector() {
                   />
                   <Stat
                     label="Max Drawdown"
-                    value={`${(creature.performance.maxDrawdown / 1000).toFixed(1)}%`}
-                    positive={false}
+                    value={`-$${(Math.abs(creature.performance.maxDrawdown) / 1e6).toFixed(2)}`}
+                    positive={creature.performance.maxDrawdown === 0}
                   />
                 </div>
               </div>

@@ -72,6 +72,7 @@ contract ALIVETest is Test {
         // Wire up: set genePool on factory and ecosystem
         factory.setGenePool(address(genePool));
         ecosystem.setGenePool(address(genePool));
+        ecosystem.setXCMRouter(address(xcm));
 
         // Fund users
         usdc.mint(alice, 100_000e6);

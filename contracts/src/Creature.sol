@@ -132,9 +132,12 @@ contract Creature is ICreature {
             "" // transact payload would encode the deposit call on the target chain
         );
 
-        if (success) {
-            balance -= toDeploy;
-        }
+        // NOTE: Do NOT decrement `balance` here. The deployed capital is
+        // still owned by this creature — it's sitting in the XCMRouter.
+        // When harvest() runs, it computes:
+        //   epochReturn = actualBalance - balance = (kept + principal ± yield) - originalBalance = ±yield
+        // If we decremented balance, harvest would see toDeploy+yield (always positive),
+        // preventing any drawdown from ever being recorded.
 
         emit Fed(address(this), block.number, toDeploy);
     }

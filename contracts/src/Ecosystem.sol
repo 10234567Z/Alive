@@ -7,6 +7,12 @@ import {ICreature} from "./interfaces/ICreature.sol";
 import {GenePool} from "./GenePool.sol";
 import {CreatureFactory} from "./CreatureFactory.sol";
 
+/// @dev Minimal interface for XCMRouter yield simulation.
+interface IYieldSimulator {
+    function deployedCapital(address creature) external view returns (uint256);
+    function simulateReturnForCreature(address creature, address asset, int256 yieldAmount) external;
+}
+
 /// @title Ecosystem
 /// @notice Top-level entry point for the ALIVE protocol. All user capital
 ///         flows through this contract. It manages the lifecycle of the
@@ -63,6 +69,9 @@ contract Ecosystem {
     CreatureFactory public factory;
     IERC20 public stablecoin;
 
+    /// @notice XCM router for yield simulation (SIMULATION mode).
+    IYieldSimulator public xcmRouter;
+
     /// @notice Owner / deployer — limited to initial setup.
     address public owner;
 
@@ -118,6 +127,11 @@ contract Ecosystem {
     function setGenePool(address _genePool) external onlyOwner {
         require(address(genePool) == address(0), "Ecosystem: genePool already set");
         genePool = GenePool(_genePool);
+    }
+
+    /// @notice Set the XCM router for yield simulation.
+    function setXCMRouter(address _xcmRouter) external onlyOwner {
+        xcmRouter = IYieldSimulator(_xcmRouter);
     }
 
     /// @notice Register a newly seeded Creature into the active population.
@@ -316,7 +330,13 @@ contract Ecosystem {
     }
 
     /// @dev Harvest all active Creatures — they collect returns.
+    ///      First simulates XCM yields (DNA-dependent) so creatures get
+    ///      their capital back with strategy-dependent returns, then
+    ///      calls harvest() so creatures record the performance.
     function _harvestAll() internal {
+        // Simulate yields: return deployed capital + DNA-dependent yield
+        _simulateYields();
+
         int256 epochYield = 0;
         for (uint256 i = 0; i < activeCreatures.length; i++) {
             if (ICreature(activeCreatures[i]).isAlive()) {
@@ -329,6 +349,84 @@ contract Ecosystem {
 
         // Update totalCapital to reflect TOTAL system value (vault + creatures)
         totalCapital = _totalSystemValue();
+    }
+
+    /// @dev Simulate XCM yields with DNA-dependent returns.
+    ///      Each creature gets a different yield based on their strategy DNA:
+    ///        - poolType determines base yield (RESTAKING > STAKING > VAULT > AMM > LENDING > STABLE_SWAP)
+    ///        - riskCeiling determines variance (higher risk = wider outcomes)
+    ///        - maxSlippage penalizes sloppy execution
+    ///      Pseudo-randomness per creature per epoch ensures outcome diversity.
+    function _simulateYields() internal {
+        if (address(xcmRouter) == address(0)) return;
+
+        for (uint256 i = 0; i < activeCreatures.length; i++) {
+            address creature = activeCreatures[i];
+            if (!ICreature(creature).isAlive()) continue;
+
+            uint256 deployed = xcmRouter.deployedCapital(creature);
+            if (deployed == 0) continue;
+
+            ICreature.DNA memory dna = ICreature(creature).getDNA();
+            int256 yieldAmount = _computeCreatureYield(creature, dna, deployed);
+
+            xcmRouter.simulateReturnForCreature(
+                creature,
+                address(stablecoin),
+                yieldAmount
+            );
+        }
+    }
+
+    /// @dev Compute yield for a creature based on its DNA strategy.
+    ///      Returns SIGNED yield amount — positive = gain, negative = loss.
+    ///
+    ///      Yield formula (per epoch):
+    ///        base_yield  = pool_type_base   (50–250 bps)
+    ///        penalty     = maxSlippage / 5  (2–100 bps)
+    ///        noise       = random in [0, riskCeiling * 150] bps
+    ///        total_bps   = base - penalty - riskRange/2 + noise
+    ///
+    ///      Risk-reward trade-off: high-risk strategies can go negative,
+    ///      creating drawdowns that differentiate fitness scores.
+    function _computeCreatureYield(
+        address creature,
+        ICreature.DNA memory dna,
+        uint256 deployed
+    ) internal view returns (int256) {
+        // Base yield per pool type (basis points per epoch)
+        // Deliberately moderate so risky strategies can go negative
+        uint256 baseYieldBps;
+        if (dna.poolType == 0) baseYieldBps = 120;       // AMM_LP
+        else if (dna.poolType == 1) baseYieldBps = 80;   // LENDING
+        else if (dna.poolType == 2) baseYieldBps = 180;  // STAKING
+        else if (dna.poolType == 3) baseYieldBps = 150;  // VAULT
+        else if (dna.poolType == 4) baseYieldBps = 50;   // STABLE_SWAP
+        else if (dna.poolType == 5) baseYieldBps = 250;  // RESTAKING
+        else baseYieldBps = 100;
+
+        // Slippage penalty: higher maxSlippage = worse execution
+        uint256 slippagePenalty = uint256(dna.maxSlippage) / 5;
+
+        // Risk-based variance using pseudo-randomness
+        uint256 noise = uint256(keccak256(abi.encodePacked(
+            block.prevrandao, creature, currentEpoch
+        )));
+        // Wider risk range so high-risk creatures can swing negative
+        uint256 riskRange = uint256(dna.riskCeiling) * 150;
+        uint256 noiseOffset = noise % (riskRange + 1);
+
+        // Center noise: base - penalty - riskRange/2 + noiseOffset
+        // High riskCeiling → riskRange/2 can exceed base → negative yields
+        int256 totalBps = int256(baseYieldBps)
+            - int256(slippagePenalty)
+            - int256(riskRange / 2)
+            + int256(noiseOffset);
+
+        // Cap losses at -500 bps (5%) per epoch to avoid instant wipeout
+        if (totalBps < -500) totalBps = -500;
+
+        return (int256(deployed) * totalBps) / 10_000;
     }
 
     /// @dev Run evolution via GenePool — score, select, breed, kill.

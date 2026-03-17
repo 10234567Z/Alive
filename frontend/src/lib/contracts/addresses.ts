@@ -2,20 +2,22 @@
 
 import { defineChain } from "viem";
 
-// ── Local Anvil chain (dev) ──
-export const anvilLocal = defineChain({
-  id: 31337,
-  name: "Anvil Local",
-  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+// ── Westend Asset Hub Fork (Anvil forking Westend, localhost) ──
+// We fork Westend Asset Hub so the real XCM precompile (0x0...0A0000)
+// is available. Anvil preserves the chain ID from the fork.
+export const westendFork = defineChain({
+  id: 420420421, // Westend Asset Hub EVM chain ID (preserved by Anvil fork)
+  name: "Westend Asset Hub (Fork)",
+  nativeCurrency: { name: "Westend", symbol: "WND", decimals: 18 },
   rpcUrls: {
     default: { http: ["http://localhost:8545"] },
   },
   testnet: true,
 });
 
-// ── Westend Asset Hub EVM (production testnet) ──
+// ── Westend Asset Hub EVM (production — direct deploy) ──
 export const westendAssetHub = defineChain({
-  id: 420420421, // Westend Asset Hub EVM chain ID
+  id: 420420421,
   name: "Westend Asset Hub",
   nativeCurrency: { name: "Westend", symbol: "WND", decimals: 18 },
   rpcUrls: {
@@ -24,16 +26,15 @@ export const westendAssetHub = defineChain({
   testnet: true,
 });
 
-// ── Deployed addresses (filled from deployments/local.json) ──
-// When deploying to testnet, update these with real addresses.
+// ── Deployed addresses (updated after forge script deploy) ──
 export const CONTRACTS = {
-  stablecoin: "0x5FbDB2315678afecb367f032d93F642f64180aa3" as `0x${string}`,
-  xcm: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0" as `0x${string}`,
-  evolutionEngine: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9" as `0x${string}`,
-  factory: "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707" as `0x${string}`,
-  ecosystem: "0x0165878A594ca255338adfa4d48449f69242Eb8F" as `0x${string}`,
-  genePool: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853" as `0x${string}`,
+  stablecoin: "0xfbC22278A96299D91d41C453234d97b4F5Eb9B2d" as `0x${string}`,
+  xcm: "0xC9a43158891282A2B1475592D5719c001986Aaec" as `0x${string}`,
+  evolutionEngine: "0x367761085BF3C12e5DA2Df99AC6E1a824612b8fb" as `0x${string}`,
+  factory: "0x4C2F7092C2aE51D986bEFEe378e50BD4dB99C901" as `0x${string}`,
+  ecosystem: "0x7A9Ec1d04904907De0ED7b6839CcdD59c3716AC9" as `0x${string}`,
+  genePool: "0x49fd2BE640DB2910c2fAb69bB8531Ab6E76127ff" as `0x${string}`,
 } as const;
 
-// ── Active chain (switch between dev and testnet) ──
-export const ACTIVE_CHAIN = anvilLocal;
+// ── Active chain — fork of Westend Asset Hub via Anvil ──
+export const ACTIVE_CHAIN = westendFork;

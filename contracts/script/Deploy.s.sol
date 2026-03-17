@@ -109,7 +109,8 @@ contract Deploy is Script {
         factory.setEcosystem(address(ecosystem));
         factory.setGenePool(address(genePool));
         ecosystem.setGenePool(address(genePool));
-        console2.log("7. Wired: Factory <-> Ecosystem <-> GenePool");
+        ecosystem.setXCMRouter(address(xcmRouter));
+        console2.log("7. Wired: Factory <-> Ecosystem <-> GenePool <-> XCMRouter");
 
         vm.stopBroadcast();
 

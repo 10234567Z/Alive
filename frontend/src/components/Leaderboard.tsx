@@ -139,7 +139,7 @@ function LeaderboardRow({
           }`}
         >
           {creature.performance.cumulativeReturn >= 0 ? "+" : ""}
-          {(creature.performance.cumulativeReturn / 1000).toFixed(1)}%
+          ${(Math.abs(creature.performance.cumulativeReturn) / 1e6).toFixed(0)}
         </span>
       </div>
 
@@ -147,12 +147,12 @@ function LeaderboardRow({
       <div className="col-span-2 flex items-center justify-end gap-2">
         <div className="flex flex-col items-end">
           <span className="font-display font-bold text-sm">
-            {(creature.fitnessScore / 1000).toFixed(1)}
+            {creature.fitnessScore}
           </span>
           <div className="w-16 h-1.5 bg-nb-bg border border-nb-ink/30 rounded-full overflow-hidden">
             <div
               className="h-full bg-nb-accent"
-              style={{ width: `${Math.min(100, creature.fitnessScore / 1000)}%` }}
+              style={{ width: `${Math.min(100, (creature.fitnessScore / 75) * 100)}%` }}
             />
           </div>
         </div>

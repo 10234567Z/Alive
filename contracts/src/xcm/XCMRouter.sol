@@ -269,18 +269,28 @@ contract XCMRouter is IXCM {
     }
 
     /// @notice Simulate returns for a specific creature with a custom yield.
-    /// @dev Only available in SIMULATION mode.
+    /// @dev Only available in SIMULATION mode. Yield can be negative (loss).
     function simulateReturnForCreature(
         address creature,
         address asset,
-        uint256 yieldAmount
+        int256 yieldAmount
     ) external {
         require(mode == Mode.SIMULATION, "XCMRouter: not in simulation mode");
 
         uint256 principal = deployedCapital[creature];
         if (principal == 0) return;
 
-        uint256 total = principal + yieldAmount;
+        uint256 total;
+        uint256 absYield;
+        if (yieldAmount >= 0) {
+            absYield = uint256(yieldAmount);
+            total = principal + absYield;
+        } else {
+            absYield = uint256(-yieldAmount);
+            // Loss cannot exceed principal
+            total = absYield >= principal ? 0 : principal - absYield;
+        }
+
         deployedCapital[creature] = 0;
 
         // Remove matching deployments
@@ -298,8 +308,10 @@ contract XCMRouter is IXCM {
             _deployments.pop();
         }
 
-        IERC20(asset).safeTransfer(creature, total);
-        emit ReturnsSimulated(creature, principal, yieldAmount, total);
+        if (total > 0) {
+            IERC20(asset).safeTransfer(creature, total);
+        }
+        emit ReturnsSimulated(creature, principal, absYield, total);
     }
 
     // ---------------------------------------------------------------

@@ -126,3 +126,7 @@ code, pre {
   border: 2px solid var(--color-nb-ink);
   border-radius: 999px;
 }
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

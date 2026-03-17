@@ -18,7 +18,7 @@
 //!
 //! ABI layout follows Solidity ABI encoding conventions:
 //! - DNA = 10 × 32-byte words
-//! - PerformanceRecord = 5 × 32-byte words (addr, int256×3, uint256)
+//! - PerformanceRecord = 6 × 32-byte words (addr, int256×3, uint256×2)
 //! - FitnessResult = 2 × 32-byte words (addr, uint256)
 
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -67,8 +67,8 @@ pub extern "C" fn pvm_evaluate_fitness(
 ) -> u32 {
     let input = unsafe { core::slice::from_raw_parts(input_ptr, input_len as usize) };
 
-    // Decode: each PerformanceRecord is 5 × 32 bytes = 160 bytes
-    let record_size = 160;
+    // Decode: each PerformanceRecord is 6 × 32 bytes = 192 bytes
+    let record_size = 192;
     let count = input.len() / record_size;
     let mut records = Vec::with_capacity(count);
 
@@ -97,6 +97,10 @@ pub extern "C" fn pvm_evaluate_fitness(
             chunk[152], chunk[153], chunk[154], chunk[155],
             chunk[156], chunk[157], chunk[158], chunk[159],
         ]);
+        let balance = u64::from_be_bytes([
+            chunk[184], chunk[185], chunk[186], chunk[187],
+            chunk[188], chunk[189], chunk[190], chunk[191],
+        ]);
 
         records.push(PerformanceRecord {
             creature_id,
@@ -104,6 +108,7 @@ pub extern "C" fn pvm_evaluate_fitness(
             cumulative_return,
             epochs_survived,
             max_drawdown,
+            balance,
         });
     }
 

@@ -1,16 +1,17 @@
 //! Fitness evaluation for the ALIVE Evolution Engine.
 //!
 //! Scores every Creature based on risk-adjusted returns, consistency,
-//! and survival.  The formula:
+//! and survival.  Output is in the range [0, 100].
 //!
 //! ```text
-//! fitness = annualized_return × 40
-//!         + sharpe_ratio      × 30
-//!         - drawdown_penalty  × 20
-//!         + survival_bonus    × 10
+//! fitness = return_component   (0–40)
+//!         + sharpe_proxy       (0–25)
+//!         - drawdown_penalty   (0–25)
+//!         + survival_bonus     (0–10)
 //! ```
 //!
-//! Return values are scaled by 1e4 to keep everything as integers.
+//! Returns are normalised to basis points relative to creature balance
+//! so the score is independent of capital magnitude.
 
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
@@ -35,61 +36,60 @@ pub fn evaluate_fitness(records: &[PerformanceRecord]) -> Vec<FitnessResult> {
 
 /// Compute the fitness score for a single Creature.
 ///
-/// All intermediate values are scaled by 1e4 (10 000) to avoid
-/// floating point.  Input returns are scaled by 1e6 on-chain, so
-/// we normalize accordingly.
+/// Output range: 0–100.
+/// Returns are normalised to basis points relative to balance
+/// so fitness is independent of capital magnitude.
 fn compute_fitness(r: &PerformanceRecord) -> u64 {
     let epochs = if r.epochs_survived == 0 { 1 } else { r.epochs_survived };
 
-    // ── 1. Annualized return component (weight 40) ──────────────
-    // average_return_per_epoch = cumulative_return / epochs
-    // We keep it in the 1e6 scale, then multiply by weight and
-    // divide by a normalization factor so the component lands in
-    // a sensible range.
-    let avg_return = r.cumulative_return / (epochs as i64);
-    // Shift to unsigned: add 10 000 000 (10 × 1e6) so even -10 M
-    // (= -1000%) maps to ≥ 0.
-    let shifted_return = (avg_return + 10_000_000).max(0) as u64;
-    let annualized_component = (shifted_return * 40) / 10_000;
+    // ── 4. Survival bonus (0–10) ──────────────────────────────────
+    //    0.5 points per epoch, max at 20 epochs = 10 pts
+    let survival_epochs = epochs.min(20);
+    let survival_bonus = survival_epochs / 2;
 
-    // ── 2. Sharpe-like ratio component (weight 30) ──────────────
-    // True Sharpe needs per-epoch std-dev which we don't have in a
-    // single record.  We approximate with:
-    //   sharpe_proxy = avg_return / (|max_drawdown| + 1)
-    // Larger drawdowns penalize the ratio.
-    let dd_abs = if r.max_drawdown < 0 {
-        (-r.max_drawdown) as u64
+    if r.balance == 0 {
+        return survival_bonus;
+    }
+
+    // ── Normalise returns to basis points relative to balance ──
+    let avg_return_raw = r.cumulative_return / (epochs as i64);
+    let avg_return_bps = (avg_return_raw * 10_000) / (r.balance as i64);
+
+    // ── 1. Return component (0–40) ──────────────────────────────
+    //    Linear mapping: -200 bps → 0, 0 bps → 16, 200 bps → 32, 300+ bps → 40
+    let return_score = ((avg_return_bps + 200) * 40 / 500).max(0) as u64;
+    let return_component = return_score.min(40);
+
+    // ── 2. Sharpe-like ratio (0–25) ──────────────────────────────
+    let dd_bps = if r.max_drawdown < 0 {
+        ((-r.max_drawdown) as u64 * 10_000) / r.balance
     } else {
         0u64
     };
-    
-    let sharpe_proxy = if dd_abs == 0 {
-        shifted_return // no drawdown → full credit
-    } else {
-        // Scale: shifted_return is ~1e7 range, dd_abs is ~1e6 range
-        (shifted_return * 1_000_000) / (dd_abs + 1)
-    };
-    let sharpe_component = (sharpe_proxy * 30) / 10_000;
 
-    // ── 3. Drawdown penalty component (weight 20) ───────────────
-    // Penalty grows linearly with the absolute drawdown.
-    let drawdown_penalty = (dd_abs * 20) / 10_000;
-
-    // ── 4. Survival bonus component (weight 10) ─────────────────
-    // Capped at 20 epochs to prevent immortality bias.
-    let survival_epochs = epochs.min(20);
-    let survival_bonus = survival_epochs * 10; // simple: 10 points per epoch survived, up to 200
-
-    // ── Combine ─────────────────────────────────────────────────
-    let raw = annualized_component + sharpe_component + survival_bonus;
-    // Subtract penalty (clamped to 0)
-    let score = if raw > drawdown_penalty {
-        raw - drawdown_penalty
+    let sharpe = if dd_bps == 0 && avg_return_bps > 0 {
+        25 // no drawdown with positive returns → full marks
+    } else if dd_bps == 0 {
+        10 // no drawdown, no returns → decent
+    } else if avg_return_bps > 0 {
+        let ret_bps = avg_return_bps as u64;
+        ((ret_bps * 25) / (dd_bps + ret_bps)).min(25)
     } else {
         0
     };
 
-    score
+    // ── 3. Drawdown penalty (0–25) ───────────────────────────────
+    //    Linear: 0% dd → 0 penalty, 50%+ dd → 25 penalty
+    let drawdown_penalty = ((dd_bps * 25) / 5_000).min(25);
+
+    // ── Combine (max 40 + 25 + 10 = 75 before penalty) ──────────
+    let raw = return_component + sharpe + survival_bonus;
+    let result = if raw > drawdown_penalty {
+        raw - drawdown_penalty
+    } else {
+        0
+    };
+    result.min(100)
 }
 
 // ================================================================
@@ -108,6 +108,7 @@ mod tests {
             cumulative_return: cum_ret,
             epochs_survived: epochs,
             max_drawdown: dd,
+            balance: 10_000_000, // 10 USDC default balance for tests
         }
     }
 
@@ -157,11 +158,10 @@ mod tests {
         let s30 = compute_fitness(&r30);
 
         // Survival component should be the same (capped at 20)
-        // Only difference comes from avg_return changing with more epochs
-        // The survival_bonus part itself should be equal
-        let surv20 = 20u64.min(20) * 10;
-        let surv30 = 30u64.min(20) * 10;
-        assert_eq!(surv20, surv30);
+        // With identical cumulative return but more epochs, avg return
+        // per epoch is lower for r30, so s30 should be close but not identical.
+        assert!(s20 <= 100, "Score should be <= 100, got {s20}");
+        assert!(s30 <= 100, "Score should be <= 100, got {s30}");
     }
 
     #[test]

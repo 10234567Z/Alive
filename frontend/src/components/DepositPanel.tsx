@@ -161,9 +161,14 @@ export default function DepositPanel() {
             ${shareValueUSD.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
         </div>
-        <div className="bg-nb-bg border-3 border-nb-ink rounded-nb p-3">
+        <div className="bg-nb-bg border-3 border-nb-ink rounded-nb p-3 overflow-hidden">
           <p className="text-xs font-mono text-nb-ink/60 uppercase">Shares</p>
-          <p className="font-display font-bold text-lg">{shares.toLocaleString()}</p>
+          <p className="font-display font-bold text-lg truncate">
+            {shares >= 1e9 ? `${(shares / 1e9).toFixed(1)}B` :
+             shares >= 1e6 ? `${(shares / 1e6).toFixed(1)}M` :
+             shares >= 1e3 ? `${(shares / 1e3).toFixed(1)}K` :
+             shares.toLocaleString()}
+          </p>
         </div>
         <div className="bg-nb-accent/20 border-3 border-nb-ink rounded-nb p-3 col-span-2 flex items-center justify-between">
           <div>

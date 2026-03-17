@@ -56,6 +56,9 @@ pub struct PerformanceRecord {
     pub epochs_survived: u64,
     /// Worst single-epoch loss (signed, scaled by 1e6, ≤ 0 for losses).
     pub max_drawdown: i64,
+    /// Current USDC balance (scaled by 1e6). Used to normalise
+    /// returns to basis points so fitness is capital-independent.
+    pub balance: u64,
 }
 
 /// Result of fitness evaluation for one Creature.

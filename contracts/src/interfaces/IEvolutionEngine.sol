@@ -12,6 +12,7 @@ interface IEvolutionEngine {
         int256 cumulativeReturn;
         uint256 epochsSurvived;
         int256 maxDrawdown;
+        uint256 balance;  // current USDC balance (6 decimals), used to normalize returns
     }
 
     struct FitnessResult {
