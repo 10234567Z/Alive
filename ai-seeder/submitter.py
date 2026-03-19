@@ -121,7 +121,8 @@ class Submitter:
             })
 
             signed = self.account.sign_transaction(tx)
-            tx_hash = self.w3.eth.send_raw_transaction(signed.raw_transaction)
+            raw = getattr(signed, 'rawTransaction', None) or signed.raw_transaction
+            tx_hash = self.w3.eth.send_raw_transaction(raw)
             hex_hash = tx_hash.hex()
             logger.info("injectSeed tx sent: %s", hex_hash)
 

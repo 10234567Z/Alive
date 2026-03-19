@@ -114,7 +114,8 @@ class Keeper:
                 "gasPrice": self.w3.eth.gas_price,
             })
             signed = self.account.sign_transaction(tx)
-            tx_hash = self.w3.eth.send_raw_transaction(signed.raw_transaction)
+            raw = getattr(signed, 'rawTransaction', None) or signed.raw_transaction
+            tx_hash = self.w3.eth.send_raw_transaction(raw)
             receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
             return receipt["status"] == 1
         except Exception as exc:
