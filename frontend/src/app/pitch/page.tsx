@@ -17,11 +17,9 @@ const SLIDES = [
   { id: "solution", bg: "bg-nb-accent/20" },
   { id: "how", bg: "bg-nb-purple/20" },
   { id: "lifecycle", bg: "bg-nb-accent-2/20" },
-  { id: "architecture", bg: "bg-nb-pink/20" },
-  { id: "tech", bg: "bg-nb-accent/20" },
+  { id: "chains", bg: "bg-nb-accent/20" },
   { id: "demo", bg: "bg-nb-ok/20" },
   { id: "market", bg: "bg-nb-accent-2/20" },
-  { id: "team", bg: "bg-nb-purple/20" },
   { id: "cta", bg: "bg-nb-accent" },
 ];
 
@@ -70,12 +68,10 @@ export default function PitchDeck() {
             {slide === 2 && <SolutionSlide />}
             {slide === 3 && <HowSlide />}
             {slide === 4 && <LifecycleSlide />}
-            {slide === 5 && <ArchitectureSlide />}
-            {slide === 6 && <TechSlide />}
-            {slide === 7 && <DemoSlide />}
-            {slide === 8 && <MarketSlide />}
-            {slide === 9 && <TeamSlide />}
-            {slide === 10 && <CTASlide />}
+            {slide === 5 && <ChainsSlide />}
+            {slide === 6 && <DemoSlide />}
+            {slide === 7 && <MarketSlide />}
+            {slide === 8 && <CTASlide />}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -333,56 +329,7 @@ function LifecycleSlide() {
   );
 }
 
-function ArchitectureSlide() {
-  const contracts = [
-    { name: "Ecosystem", desc: "Manages deposits, epochs, and capital", role: "Core", color: "bg-nb-accent" },
-    { name: "Creature", desc: "Autonomous agent with its own DNA", role: "Agent", color: "bg-nb-accent-2" },
-    { name: "GenePool", desc: "Handles breeding and new creatures", role: "Genetics", color: "bg-nb-purple" },
-    { name: "EvolutionEngine", desc: "Runs crossover, mutation, selection", role: "Evolution", color: "bg-nb-pink" },
-    { name: "XCMRouter", desc: "Routes capital across chains", role: "Router", color: "bg-nb-ok" },
-    { name: "CreatureFactory", desc: "Deploys new creature contracts", role: "Factory", color: "bg-nb-warn" },
-  ];
-
-  return (
-    <SlideBox className="space-y-8">
-      <div className="text-center">
-        <span className="nb-badge bg-nb-pink/20 text-nb-pink text-lg px-4 py-1.5 mb-4 inline-flex">
-          <Shield size={18} /> Architecture
-        </span>
-        <h2 className="font-display font-bold text-3xl sm:text-5xl mt-4">6 Smart Contracts</h2>
-        <p className="text-lg text-nb-ink/60 mt-2">All live on Polkadot TestNet</p>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {contracts.map(({ name, desc, role, color }, i) => (
-          <motion.div
-            key={name}
-            initial={{ opacity: 0, rotateY: 90 }}
-            animate={{ opacity: 1, rotateY: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="nb-card p-5"
-          >
-            <div className={`inline-block ${color} border-2 border-nb-ink rounded-nb px-2 py-0.5 font-mono text-xs mb-2`}>
-              {role}
-            </div>
-            <h3 className="font-display font-bold">{name}</h3>
-            <p className="text-sm text-nb-ink/60">{desc}</p>
-          </motion.div>
-        ))}
-      </div>
-    </SlideBox>
-  );
-}
-
-function TechSlide() {
-  const stack = [
-    { layer: "Smart Contracts", items: ["6 contracts deployed", "73 passing tests", "Fully auditable"], color: "bg-nb-accent" },
-    { layer: "Evolution Engine", items: ["Real genetic algorithms", "Crossover + mutation", "Runs on-chain"], color: "bg-nb-purple" },
-    { layer: "AI Seeder", items: ["Generates new creatures", "Reads market data", "Always exploring"], color: "bg-nb-accent-2" },
-    { layer: "Frontend", items: ["Real-time dashboard", "Live epoch tracking", "Interactive explorer"], color: "bg-nb-pink" },
-    { layer: "Multi-Chain", items: ["6 target chains", "Cross-chain routing", "Auto-deployed"], color: "bg-nb-ok" },
-  ];
-
+function ChainsSlide() {
   const chains = [
     { name: "Asset Hub", id: 0 },
     { name: "Moonbeam", id: 1 },
@@ -395,46 +342,28 @@ function TechSlide() {
   return (
     <SlideBox className="space-y-8">
       <div className="text-center">
-        <span className="nb-badge bg-nb-accent/30 text-lg px-4 py-1.5 mb-4 inline-flex">
-          <Cpu size={18} /> Tech Stack
+        <span className="nb-badge bg-nb-accent-2/20 text-nb-accent-2 text-lg px-4 py-1.5 mb-4 inline-flex">
+          <Globe size={18} /> Multi-Chain
         </span>
-        <h2 className="font-display font-bold text-3xl sm:text-5xl mt-4">Built Different</h2>
+        <h2 className="font-display font-bold text-3xl sm:text-5xl mt-4">Supported Chains</h2>
+        <p className="text-lg text-nb-ink/60 mt-2">Creatures route capital across the Polkadot ecosystem</p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-        {stack.map(({ layer, items, color }, i) => (
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        {chains.map(({ name }, i) => (
           <motion.div
-            key={layer}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="nb-card p-4 text-center"
+            key={name}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: i * 0.1, type: "spring" }}
+            className="nb-card p-5 text-center"
           >
-            <div className={`${color} border-2 border-nb-ink rounded-nb py-1 px-2 font-display font-bold text-sm mb-3`}>
-              {layer}
+            <div className="w-12 h-12 mx-auto bg-nb-accent-2/20 border-3 border-nb-ink rounded-nb shadow-nb-sm flex items-center justify-center mb-3">
+              <Globe size={22} />
             </div>
-            {items.map((item) => (
-              <div key={item} className="text-sm text-nb-ink/70 py-0.5">{item}</div>
-            ))}
+            <h3 className="font-display font-bold text-lg">{name}</h3>
           </motion.div>
         ))}
-      </div>
-
-      <div className="nb-card p-4">
-        <h3 className="font-display font-bold text-center mb-3">Supported Chains</h3>
-        <div className="flex flex-wrap justify-center gap-3">
-          {chains.map(({ name, id }, i) => (
-            <motion.span
-              key={name}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.5 + i * 0.08, type: "spring" }}
-              className="nb-badge bg-nb-accent-2/20 text-base px-3 py-1"
-            >
-              <Globe size={14} /> {name}
-            </motion.span>
-          ))}
-        </div>
       </div>
     </SlideBox>
   );
@@ -528,35 +457,6 @@ function MarketSlide() {
       <div className="nb-card p-6 text-center">
         <div className="font-display font-bold text-2xl mb-2">$180B+</div>
         <div className="text-nb-ink/60">Total DeFi TVL that could benefit from autonomous yield optimization</div>
-      </div>
-    </SlideBox>
-  );
-}
-
-function TeamSlide() {
-  return (
-    <SlideBox className="space-y-8 text-center">
-      <div>
-        <span className="nb-badge bg-nb-purple/20 text-nb-purple text-lg px-4 py-1.5 mb-4 inline-flex">
-          <Users size={18} /> The Builder
-        </span>
-        <h2 className="font-display font-bold text-3xl sm:text-5xl mt-4">Solo Hacker</h2>
-      </div>
-
-      <div className="nb-card p-5 sm:p-8 max-w-lg mx-auto space-y-4">
-        <div className="w-24 h-24 mx-auto bg-nb-accent border-3 border-nb-ink rounded-nb shadow-nb flex items-center justify-center text-4xl font-display font-bold">
-          H
-        </div>
-        <h3 className="font-display font-bold text-2xl">Harsh</h3>
-        <p className="text-nb-ink/60">
-          Full-stack builder. Contracts, backend, AI, and frontend.
-          The entire ALIVE protocol built solo in one hackathon sprint.
-        </p>
-        <div className="flex flex-wrap justify-center gap-2">
-          {["Smart Contracts", "Systems", "AI / ML", "Full-Stack Web", "DevOps"].map((skill) => (
-            <span key={skill} className="nb-badge bg-nb-bg text-xs">{skill}</span>
-          ))}
-        </div>
       </div>
     </SlideBox>
   );
