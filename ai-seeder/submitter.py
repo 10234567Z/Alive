@@ -10,7 +10,10 @@ import logging
 from typing import Any
 
 from web3 import Web3
-from web3.middleware import ExtraDataToPOAMiddleware
+try:
+    from web3.middleware import ExtraDataToPOAMiddleware
+except ImportError:
+    ExtraDataToPOAMiddleware = None
 
 from abi import ECOSYSTEM_ABI, CREATURE_ABI, GENEPOOL_ABI
 from config import Config
@@ -26,7 +29,8 @@ class Submitter:
         self.config = config
         self.w3 = Web3(Web3.HTTPProvider(config.rpc_url))
         # PoA chains need the extra-data middleware
-        self.w3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
+        if ExtraDataToPOAMiddleware is not None:
+            self.w3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
 
         self.account = self.w3.eth.account.from_key(config.private_key)
         self.address = self.account.address

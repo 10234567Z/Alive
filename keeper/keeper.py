@@ -22,7 +22,10 @@ import sys
 import time
 
 from web3 import Web3
-from web3.middleware import ExtraDataToPOAMiddleware
+try:
+    from web3.middleware import ExtraDataToPOAMiddleware
+except ImportError:
+    ExtraDataToPOAMiddleware = None
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -77,7 +80,8 @@ class Keeper:
         self.yield_bps = int(os.getenv("YIELD_BPS", "500"))
 
         self.w3 = Web3(Web3.HTTPProvider(rpc))
-        self.w3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
+        if ExtraDataToPOAMiddleware is not None:
+            self.w3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
         self.account = self.w3.eth.account.from_key(pk)
 
         self.ecosystem = self.w3.eth.contract(
