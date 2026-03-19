@@ -83,7 +83,8 @@ export default function ChainSync() {
         // (best approximation without per-epoch historical fitness storage)
         let topFitness = 0;
         if (creatures.length > 0) {
-          topFitness = Math.max(...creatures.map((c) => c.fitnessScore));
+          const scores = creatures.map((c) => c.fitnessScore).filter((s) => s > 0);
+          topFitness = scores.length > 0 ? Math.max(...scores) : 0;
         }
 
         // For avgYield, compute from ecosystem totalYieldGenerated

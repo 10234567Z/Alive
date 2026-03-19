@@ -77,10 +77,10 @@ export const POOL_TYPE_COLORS: Record<number, string> = {
 };
 
 export const CHAIN_NAMES: Record<number, string> = {
-  2034: "Hydration",
-  2000: "Acala",
-  2004: "Moonbeam",
-  2006: "Astar",
-  2030: "Bifrost",
-  2035: "Phala",
+  0: "Asset Hub",
+  1: "Moonbeam",
+  2: "Acala",
+  3: "Astar",
+  4: "HydraDX",
+  5: "Bifrost",
 };

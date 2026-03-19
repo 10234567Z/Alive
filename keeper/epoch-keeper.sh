@@ -11,11 +11,12 @@
 
 set -euo pipefail
 
-RPC_URL="${RPC_URL:-http://localhost:8545}"
+RPC_URL="${RPC_URL:-https://eth-rpc-testnet.polkadot.io/}"
 PRIVATE_KEY="${PRIVATE_KEY:-0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80}"
-# Default Ecosystem address — will be updated after deploy if it changes.
-ECOSYSTEM="${ECOSYSTEM:-0x7A9Ec1d04904907De0ED7b6839CcdD59c3716AC9}"
-POLL_INTERVAL="${POLL_INTERVAL:-5}"  # seconds between checks
+ECOSYSTEM="${ECOSYSTEM:-0xdf422894281A27Aa3d19B0B7D578c59Cb051ABF8}"
+XCM_ROUTER="${XCM_ROUTER:-0xA36B5Fec0E93d24908fAA9966535567E9f888994}"
+POLL_INTERVAL="${POLL_INTERVAL:-30}"  # seconds between checks
+YIELD_BPS="${YIELD_BPS:-500}"  # 5% yield per epoch
 
 # Phase enum: 0=IDLE, 1=FEEDING, 2=HARVESTING, 3=EVOLVING, 4=ALLOCATING
 PHASE_NAMES=("IDLE" "FEEDING" "HARVESTING" "EVOLVING" "ALLOCATING")
@@ -49,10 +50,21 @@ advance() {
   log "  ⚡ Advancing from $phase_name..."
   
   local result
+  # If transitioning from HARVESTING, simulate returns first
+  if [[ "$1" == "2" ]]; then
+    log "  💰 Simulating XCM returns (${YIELD_BPS} bps)..."
+    cast send "$XCM_ROUTER" "simulateReturns(uint256)" "$YIELD_BPS" \
+      --rpc-url "$RPC_URL" \
+      --private-key "$PRIVATE_KEY" \
+      --chain polkadot-testnet \
+      --json &>/dev/null || true
+    sleep 2
+  fi
+
   result=$(cast send "$ECOSYSTEM" "advanceEpoch()" \
     --rpc-url "$RPC_URL" \
     --private-key "$PRIVATE_KEY" \
-    --gas-limit 30000000 \
+    --chain polkadot-testnet \
     --json 2>&1)
   
   if echo "$result" | grep -q '"status":"0x1"'; then

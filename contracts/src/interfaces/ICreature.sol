@@ -6,7 +6,7 @@ pragma solidity ^0.8.24;
 ///         interact with deployed Creature instances.
 interface ICreature {
     struct DNA {
-        uint8 targetChainId;
+        uint8 targetChainId; // Polkadot destination index: 0=AssetHub, 1=Moonbeam, 2=Acala, 3=Astar, 4=HydraDX, 5=Bifrost
         uint8 poolType; // 0=AMM_LP, 1=LENDING, 2=STAKING, 3=VAULT, 4=STABLE_SWAP, 5=RESTAKING
         uint16 allocationRatio; // basis points 1000-10000
         uint16 rebalanceThreshold; // basis points 100-2000

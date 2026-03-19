@@ -11,7 +11,7 @@ load_dotenv()
 # ── DNA field ranges (must match pvm/src/types.rs DnaFieldRanges) ────
 
 DNA_FIELD_RANGES: dict[str, tuple[int, int]] = {
-    "targetChainId":      (0, 255),
+    "targetChainId":      (0, 5),
     "poolType":           (0, 5),
     "allocationRatio":    (1000, 10000),
     "rebalanceThreshold": (100, 5000),
@@ -35,12 +35,12 @@ POOL_TYPE_NAMES: dict[int, str] = {
 # ── Known Polkadot parachains ─────────────────────────────────────────
 
 PARACHAIN_NAMES: dict[int, str] = {
-    2034: "Hydration",
-    2000: "Acala",
-    2004: "Moonbeam",
-    2006: "Astar",
-    2030: "Bifrost",
-    2035: "Phala",
+    0: "Asset Hub",
+    1: "Moonbeam",
+    2: "Acala",
+    3: "Astar",
+    4: "HydraDX",
+    5: "Bifrost",
 }
 
 
@@ -53,8 +53,8 @@ class Config:
     genepool_address: str = field(default_factory=lambda: os.getenv("GENEPOOL_ADDRESS", ""))
     private_key: str = field(default_factory=lambda: os.getenv("SEEDER_PRIVATE_KEY", ""))
 
-    openai_api_key: str = field(default_factory=lambda: os.getenv("OPENAI_API_KEY", ""))
-    openai_model: str = field(default_factory=lambda: os.getenv("OPENAI_MODEL", "gpt-4o"))
+    google_api_key: str = field(default_factory=lambda: os.getenv("GOOGLE_API_KEY", ""))
+    gemini_model: str = field(default_factory=lambda: os.getenv("GEMINI_MODEL", "gemini-2.5-flash-preview-05-20"))
 
     poll_interval: int = field(
         default_factory=lambda: int(os.getenv("POLL_INTERVAL_SECONDS", "120"))
@@ -79,8 +79,8 @@ class Config:
             missing.append("GENEPOOL_ADDRESS")
         if not self.private_key:
             missing.append("SEEDER_PRIVATE_KEY")
-        if not self.openai_api_key:
-            missing.append("OPENAI_API_KEY")
+        if not self.google_api_key:
+            missing.append("GOOGLE_API_KEY")
         if missing:
             raise EnvironmentError(
                 f"Missing required env vars: {', '.join(missing)}"

@@ -27,14 +27,14 @@ export const polkadotHubLocal = defineChain({
   testnet: true,
 });
 
-// ── Deployed addresses (Polkadot Hub TestNet — 2026-03-19) ──
+// ── Deployed addresses (Polkadot Hub TestNet — 2026-03-19 v4) ──
 export const CONTRACTS = {
-  stablecoin: "0x28d9FC8645f0F09c1ba595E46BAf7f49FF4A1EB4" as `0x${string}`,
-  xcm: "0xa5100dFD6C966aC60a8E497a3545B49B12Dd45BC" as `0x${string}`,
-  evolutionEngine: "0x3F6514E6bBFFeE6cEDE3d07850F84cDde3D1F825" as `0x${string}`,
-  factory: "0x0B2719dd0710170d9cDe15a55C7D459Af3924D44" as `0x${string}`,
-  ecosystem: "0xEeC547709EfFBf50760B8A224B9809d520b5Eb3A" as `0x${string}`,
-  genePool: "0xAc0650630410d91299968Ee65fdaac74AA27C1c7" as `0x${string}`,
+  stablecoin: "0x8f7E2D2Fbd0a00A54396143f1BF3dB9e604C5f8C" as `0x${string}`,
+  xcm: "0xA36B5Fec0E93d24908fAA9966535567E9f888994" as `0x${string}`,
+  evolutionEngine: "0x91cc800FfeCd3126cF20e1e15904235d0175b950" as `0x${string}`,
+  factory: "0xB7757653FDe43C6c337743647a31bf14Bab7cF83" as `0x${string}`,
+  ecosystem: "0xdf422894281A27Aa3d19B0B7D578c59Cb051ABF8" as `0x${string}`,
+  genePool: "0x799a5Fd57d09B617e554DaC16A7262EbE3EfF8c3" as `0x${string}`,
 } as const;
 
 // ── Active chain — Polkadot Hub TestNet (production) ──

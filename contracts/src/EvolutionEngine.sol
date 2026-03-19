@@ -202,9 +202,9 @@ contract EvolutionEngine is IEvolutionEngine {
         // Initialize xorshift64 state (must not be zero)
         uint256 state = seed == 0 ? 1 : seed;
 
-        // Field 0: targetChainId (range 0–255)
+        // Field 0: targetChainId (0=AssetHub, 1=Moonbeam, 2=Acala, 3=Astar, 4=HydraDX, 5=Bifrost)
         (state, d.targetChainId) = _maybeMutateU8(
-            state, mutationRate, d.targetChainId, 0, 255
+            state, mutationRate, d.targetChainId, 0, 5
         );
 
         // Field 1: poolType (range 0–5)

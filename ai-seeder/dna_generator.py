@@ -11,11 +11,24 @@ import json
 import logging
 from typing import Any, Sequence
 
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage, SystemMessage
-
 from config import Config, DNA_FIELD_RANGES, POOL_TYPE_NAMES, PARACHAIN_NAMES
 from market_scanner import YieldSource
+
+# Lazy imports: langchain_google_genai and langchain_core are only needed
+# when using LLM mode (not --no-llm). Defer to avoid import errors
+# when these heavy deps are not installed.
+ChatGoogleGenerativeAI = None
+HumanMessage = None
+SystemMessage = None
+
+def _ensure_langchain():
+    global ChatGoogleGenerativeAI, HumanMessage, SystemMessage
+    if ChatGoogleGenerativeAI is None:
+        from langchain_google_genai import ChatGoogleGenerativeAI as _C
+        from langchain_core.messages import HumanMessage as _H, SystemMessage as _S
+        ChatGoogleGenerativeAI = _C
+        HumanMessage = _H
+        SystemMessage = _S
 
 logger = logging.getLogger(__name__)
 
@@ -112,12 +125,13 @@ def generate_dna(
     count: int = 5,
 ) -> list[dict[str, int]]:
     """Call the LLM and return validated DNA dicts."""
+    _ensure_langchain()
 
-    llm = ChatOpenAI(
-        model=config.openai_model,
-        api_key=config.openai_api_key,
-        temperature=0.9,   # high creativity
-        max_tokens=2048,
+    llm = ChatGoogleGenerativeAI(
+        model=config.gemini_model,
+        google_api_key=config.google_api_key,
+        temperature=0.9,
+        max_output_tokens=2048,
     )
 
     system = SystemMessage(content=_SYSTEM_PROMPT.format(
@@ -136,21 +150,33 @@ def generate_dna(
         count=count,
     ))
 
-    logger.info("Requesting %d DNA from LLM (%s)…", count, config.openai_model)
+    logger.info("Requesting %d DNA from LLM (%s)…", count, config.gemini_model)
 
     response = llm.invoke([system, user])
-    raw = response.content.strip()
+    # Gemini may return content as a list of blocks; flatten to string
+    raw = response.content
+    if isinstance(raw, list):
+        raw = "".join(str(block) for block in raw)
+    raw = raw.strip()
 
     # Strip markdown code fences if present
-    if raw.startswith("```"):
-        lines = raw.split("\n")
-        lines = [l for l in lines if not l.startswith("```")]
-        raw = "\n".join(lines)
+    if "```" in raw:
+        import re
+        m = re.search(r"```(?:json)?\s*\n?(.*?)```", raw, re.DOTALL)
+        if m:
+            raw = m.group(1).strip()
+
+    # Try to extract JSON array if surrounded by other text
+    if not raw.startswith("["):
+        start = raw.find("[")
+        end = raw.rfind("]")
+        if start != -1 and end != -1:
+            raw = raw[start:end + 1]
 
     try:
         parsed = json.loads(raw)
     except json.JSONDecodeError as exc:
-        logger.error("LLM returned invalid JSON: %s", exc)
+        logger.error("LLM returned invalid JSON: %s\nRaw: %.500s", exc, raw)
         return []
 
     if not isinstance(parsed, list):

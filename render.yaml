@@ -1,0 +1,65 @@
+# ── ALIVE Protocol — Render Blueprint ────────────────────────────
+# Deploys the epoch keeper and AI seeder as background workers.
+# Frontend is deployed separately (e.g. Vercel).
+#
+# Setup:
+#   1. Push repo to GitHub
+#   2. Go to https://dashboard.render.com → New Blueprint
+#   3. Connect your repo
+#   4. Set the env vars marked "sync: false" in the Render dashboard
+# ──────────────────────────────────────────────────────────────────
+
+services:
+  # ── Epoch Keeper ────────────────────────────────────────────────
+  - type: worker
+    name: alive-epoch-keeper
+    runtime: python
+    region: frankfurt
+    rootDir: keeper
+    buildCommand: pip install -r requirements.txt
+    startCommand: python keeper.py
+    envVars:
+      - key: POLKADOT_HUB_RPC
+        value: https://eth-rpc-testnet.polkadot.io/
+      - key: ECOSYSTEM_ADDRESS
+        value: "0xdf422894281A27Aa3d19B0B7D578c59Cb051ABF8"
+      - key: XCM_ROUTER_ADDRESS
+        value: "0xA36B5Fec0E93d24908fAA9966535567E9f888994"
+      - key: KEEPER_PRIVATE_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: POLL_INTERVAL_SECONDS
+        value: "30"
+      - key: YIELD_BPS
+        value: "500"
+      - key: PYTHON_VERSION
+        value: "3.12.0"
+
+  # ── AI Seeder ───────────────────────────────────────────────────
+  - type: worker
+    name: alive-ai-seeder
+    runtime: python
+    region: frankfurt
+    rootDir: ai-seeder
+    buildCommand: pip install -r requirements.txt
+    startCommand: python seeder.py
+    envVars:
+      - key: POLKADOT_HUB_RPC
+        value: https://eth-rpc-testnet.polkadot.io/
+      - key: ECOSYSTEM_ADDRESS
+        value: "0xdf422894281A27Aa3d19B0B7D578c59Cb051ABF8"
+      - key: GENEPOOL_ADDRESS
+        value: "0x799a5Fd57d09B617e554DaC16A7262EbE3EfF8c3"
+      - key: SEEDER_PRIVATE_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: GOOGLE_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: GEMINI_MODEL
+        value: "gemini-3.1-pro-preview"
+      - key: POLL_INTERVAL_SECONDS
+        value: "120"
+      - key: MIN_POPULATION
+        value: "5"
+      - key: SEEDS_PER_INJECTION
+        value: "3"
+      - key: PYTHON_VERSION
+        value: "3.12.0"

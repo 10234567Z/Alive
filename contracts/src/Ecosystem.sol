@@ -567,6 +567,10 @@ contract Ecosystem {
         uint256 total = stablecoin.balanceOf(address(this));
         for (uint256 i = 0; i < activeCreatures.length; i++) {
             total += stablecoin.balanceOf(activeCreatures[i]);
+            // Include capital currently deployed to XCM strategies
+            if (address(xcmRouter) != address(0)) {
+                total += xcmRouter.deployedCapital(activeCreatures[i]);
+            }
         }
         return total;
     }

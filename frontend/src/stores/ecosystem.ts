@@ -68,7 +68,17 @@ export const useEcosystemStore = create<EcosystemStore>((set) => ({
 
   addEpochRecord: (record) =>
     set((state) => {
-      if (state.epochs.some((e) => e.epoch === record.epoch)) return state;
+      const idx = state.epochs.findIndex((e) => e.epoch === record.epoch);
+      if (idx >= 0) {
+        // Update existing record if new topFitness is higher
+        const existing = state.epochs[idx];
+        if (record.topFitness > existing.topFitness) {
+          const updated = [...state.epochs];
+          updated[idx] = { ...existing, topFitness: record.topFitness, avgYield: record.avgYield };
+          return { epochs: updated };
+        }
+        return state;
+      }
       return { epochs: [...state.epochs, record].sort((a, b) => a.epoch - b.epoch) };
     }),
 
