@@ -24,23 +24,23 @@ export default function LeaderboardPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-nb-warn border-3 border-nb-ink rounded-nb shadow-nb-sm flex items-center justify-center">
-            <Trophy size={24} />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-nb-warn border-3 border-nb-ink rounded-nb shadow-nb-sm flex items-center justify-center">
+            <Trophy size={20} className="sm:w-6 sm:h-6" />
           </div>
           <div>
-            <h1 className="font-display font-bold text-3xl">Leaderboard</h1>
-            <p className="text-nb-ink/60">
+            <h1 className="font-display font-bold text-2xl sm:text-3xl">Leaderboard</h1>
+            <p className="text-nb-ink/60 text-sm">
               {alive} alive &middot; {dead} dead &middot; survival of the fittest
             </p>
           </div>
         </div>
 
         {/* Filter */}
-        <div className="flex items-center gap-2">
-          <Filter size={16} className="text-nb-ink/50" />
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <Filter size={16} className="text-nb-ink/50 hidden sm:block" />
           {(["all", "alive", "dead"] as const).map((f) => (
             <button
               key={f}

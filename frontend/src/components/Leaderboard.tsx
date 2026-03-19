@@ -17,8 +17,8 @@ export default function Leaderboard({ filter = "all" }: { filter?: "all" | "aliv
 
   return (
     <div className="space-y-3">
-      {/* Table Header */}
-      <div className="grid grid-cols-12 gap-2 px-4 py-2 text-xs font-mono text-nb-ink/50 uppercase">
+      {/* Table Header — desktop only */}
+      <div className="hidden md:grid grid-cols-12 gap-2 px-4 py-2 text-xs font-mono text-nb-ink/50 uppercase">
         <span className="col-span-1">#</span>
         <span className="col-span-3">Creature</span>
         <span className="col-span-2">Strategy</span>
@@ -53,6 +53,23 @@ function LeaderboardRow({
   const isTop3 = rank <= 3;
   const isDead = !creature.isAlive;
 
+  const rankBadge =
+    rank === 1 ? (
+      <div className="w-8 h-8 bg-nb-warn border-2 border-nb-ink rounded-lg flex items-center justify-center">
+        <Crown size={16} />
+      </div>
+    ) : rank === 2 ? (
+      <div className="w-8 h-8 bg-gray-300 border-2 border-nb-ink rounded-lg flex items-center justify-center font-display font-bold">
+        2
+      </div>
+    ) : rank === 3 ? (
+      <div className="w-8 h-8 bg-amber-700/30 border-2 border-nb-ink rounded-lg flex items-center justify-center font-display font-bold">
+        3
+      </div>
+    ) : (
+      <span className="font-mono text-sm text-nb-ink/50 pl-2">{rank}</span>
+    );
+
   return (
     <motion.button
       initial={{ opacity: 0, x: -20 }}
@@ -60,103 +77,119 @@ function LeaderboardRow({
       transition={{ delay: rank * 0.04 }}
       onClick={onClick}
       className={`
-        w-full grid grid-cols-12 gap-2 items-center px-4 py-3 text-left
-        border-3 border-nb-ink rounded-nb transition-all cursor-pointer
+        w-full text-left border-3 border-nb-ink rounded-nb transition-all cursor-pointer
         ${isDead ? "bg-nb-error/5 opacity-60" : "bg-nb-card"}
         ${isTop3 ? "shadow-nb-sm" : "shadow-none"}
         hover:-translate-y-0.5 hover:shadow-nb
       `}
     >
-      {/* Rank */}
-      <div className="col-span-1">
-        {rank === 1 ? (
-          <div className="w-8 h-8 bg-nb-warn border-2 border-nb-ink rounded-lg flex items-center justify-center">
-            <Crown size={16} />
-          </div>
-        ) : rank === 2 ? (
-          <div className="w-8 h-8 bg-gray-300 border-2 border-nb-ink rounded-lg flex items-center justify-center font-display font-bold">
-            2
-          </div>
-        ) : rank === 3 ? (
-          <div className="w-8 h-8 bg-amber-700/30 border-2 border-nb-ink rounded-lg flex items-center justify-center font-display font-bold">
-            3
-          </div>
-        ) : (
-          <span className="font-mono text-sm text-nb-ink/50 pl-2">{rank}</span>
-        )}
-      </div>
-
-      {/* Creature ID */}
-      <div className="col-span-3 flex items-center gap-2">
+      {/* ── Mobile card layout ── */}
+      <div className="flex md:hidden items-center gap-3 px-3 py-3">
+        <div className="shrink-0">{rankBadge}</div>
         <div
-          className="w-8 h-8 border-2 border-nb-ink rounded-lg flex items-center justify-center text-xs font-bold"
+          className="w-9 h-9 border-2 border-nb-ink rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
           style={{ backgroundColor: POOL_TYPE_COLORS[creature.dna.poolType] || "#6EE7B7" }}
         >
           {isDead ? <Skull size={14} /> : `G${creature.generation}`}
         </div>
-        <div>
-          <p className="font-mono text-sm font-medium">
-            #{creature.address.slice(2, 8)}
-          </p>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <p className="font-mono text-sm font-medium">#{creature.address.slice(2, 8)}</p>
+            <span
+              className="nb-badge text-[10px] py-0 px-1.5"
+              style={{ backgroundColor: `${POOL_TYPE_COLORS[creature.dna.poolType]}33` }}
+            >
+              {POOL_TYPE_NAMES[creature.dna.poolType]}
+            </span>
+          </div>
           <p className="text-xs text-nb-ink/40">
             {CHAIN_NAMES[creature.dna.targetChainId] || `Chain ${creature.dna.targetChainId}`}
           </p>
         </div>
+        <div className="text-right shrink-0">
+          <p className="font-display font-bold text-sm">{creature.fitnessScore}</p>
+          <p className={`text-xs font-mono ${creature.performance.cumulativeReturn >= 0 ? "text-nb-ok" : "text-nb-error"}`}>
+            {creature.performance.cumulativeReturn >= 0 ? "+" : ""}${(Math.abs(creature.performance.cumulativeReturn) / 1e6).toFixed(0)}
+          </p>
+        </div>
+        <ChevronRight size={14} className="text-nb-ink/30 shrink-0" />
       </div>
 
-      {/* Strategy */}
-      <div className="col-span-2">
-        <span
-          className="nb-badge text-xs"
-          style={{
-            backgroundColor: `${POOL_TYPE_COLORS[creature.dna.poolType]}33`,
-          }}
-        >
-          {POOL_TYPE_NAMES[creature.dna.poolType]}
-        </span>
-      </div>
+      {/* ── Desktop table layout ── */}
+      <div className="hidden md:grid grid-cols-12 gap-2 items-center px-4 py-3">
+        {/* Rank */}
+        <div className="col-span-1">{rankBadge}</div>
 
-      {/* Gen */}
-      <div className="col-span-1 text-center font-mono text-sm">
-        {creature.generation}
-      </div>
-
-      {/* Epochs */}
-      <div className="col-span-1 text-center font-mono text-sm">
-        {creature.performance.epochsSurvived}
-      </div>
-
-      {/* Return */}
-      <div className="col-span-2 text-right flex items-center justify-end gap-1">
-        {creature.performance.cumulativeReturn >= 0 ? (
-          <TrendingUp size={14} className="text-nb-ok" />
-        ) : (
-          <TrendingDown size={14} className="text-nb-error" />
-        )}
-        <span
-          className={`font-mono text-sm font-semibold ${
-            creature.performance.cumulativeReturn >= 0 ? "text-nb-ok" : "text-nb-error"
-          }`}
-        >
-          {creature.performance.cumulativeReturn >= 0 ? "+" : ""}
-          ${(Math.abs(creature.performance.cumulativeReturn) / 1e6).toFixed(0)}
-        </span>
-      </div>
-
-      {/* Fitness */}
-      <div className="col-span-2 flex items-center justify-end gap-2">
-        <div className="flex flex-col items-end">
-          <span className="font-display font-bold text-sm">
-            {creature.fitnessScore}
-          </span>
-          <div className="w-16 h-1.5 bg-nb-bg border border-nb-ink/30 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-nb-accent"
-              style={{ width: `${Math.min(100, (creature.fitnessScore / 75) * 100)}%` }}
-            />
+        {/* Creature ID */}
+        <div className="col-span-3 flex items-center gap-2">
+          <div
+            className="w-8 h-8 border-2 border-nb-ink rounded-lg flex items-center justify-center text-xs font-bold"
+            style={{ backgroundColor: POOL_TYPE_COLORS[creature.dna.poolType] || "#6EE7B7" }}
+          >
+            {isDead ? <Skull size={14} /> : `G${creature.generation}`}
+          </div>
+          <div>
+            <p className="font-mono text-sm font-medium">
+              #{creature.address.slice(2, 8)}
+            </p>
+            <p className="text-xs text-nb-ink/40">
+              {CHAIN_NAMES[creature.dna.targetChainId] || `Chain ${creature.dna.targetChainId}`}
+            </p>
           </div>
         </div>
-        <ChevronRight size={14} className="text-nb-ink/30" />
+
+        {/* Strategy */}
+        <div className="col-span-2">
+          <span
+            className="nb-badge text-xs"
+            style={{ backgroundColor: `${POOL_TYPE_COLORS[creature.dna.poolType]}33` }}
+          >
+            {POOL_TYPE_NAMES[creature.dna.poolType]}
+          </span>
+        </div>
+
+        {/* Gen */}
+        <div className="col-span-1 text-center font-mono text-sm">
+          {creature.generation}
+        </div>
+
+        {/* Epochs */}
+        <div className="col-span-1 text-center font-mono text-sm">
+          {creature.performance.epochsSurvived}
+        </div>
+
+        {/* Return */}
+        <div className="col-span-2 text-right flex items-center justify-end gap-1">
+          {creature.performance.cumulativeReturn >= 0 ? (
+            <TrendingUp size={14} className="text-nb-ok" />
+          ) : (
+            <TrendingDown size={14} className="text-nb-error" />
+          )}
+          <span
+            className={`font-mono text-sm font-semibold ${
+              creature.performance.cumulativeReturn >= 0 ? "text-nb-ok" : "text-nb-error"
+            }`}
+          >
+            {creature.performance.cumulativeReturn >= 0 ? "+" : ""}
+            ${(Math.abs(creature.performance.cumulativeReturn) / 1e6).toFixed(0)}
+          </span>
+        </div>
+
+        {/* Fitness */}
+        <div className="col-span-2 flex items-center justify-end gap-2">
+          <div className="flex flex-col items-end">
+            <span className="font-display font-bold text-sm">
+              {creature.fitnessScore}
+            </span>
+            <div className="w-16 h-1.5 bg-nb-bg border border-nb-ink/30 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-nb-accent"
+                style={{ width: `${Math.min(100, (creature.fitnessScore / 75) * 100)}%` }}
+              />
+            </div>
+          </div>
+          <ChevronRight size={14} className="text-nb-ink/30" />
+        </div>
       </div>
     </motion.button>
   );

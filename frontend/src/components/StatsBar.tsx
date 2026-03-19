@@ -54,31 +54,33 @@ export default function StatsBar() {
   ];
 
   return (
-    <div className="w-full overflow-x-auto">
-      <div className="flex items-stretch gap-3 min-w-max px-1 py-1">
+    <div className="w-full">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
         {stats.map((stat, i) => (
           <motion.div
             key={stat.label}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08 }}
-            className="flex items-center gap-3 bg-nb-card border-3 border-nb-ink rounded-nb px-4 py-3 shadow-nb-sm hover:-translate-y-0.5 hover:shadow-nb transition-all"
+            className={`flex items-center gap-2 sm:gap-3 bg-nb-card border-3 border-nb-ink rounded-nb px-3 sm:px-4 py-2.5 sm:py-3 shadow-nb-sm hover:-translate-y-0.5 hover:shadow-nb transition-all ${
+              i === stats.length - 1 && stats.length % 2 !== 0 ? "col-span-2 sm:col-span-1" : ""
+            }`}
           >
-            <div className="w-9 h-9 bg-nb-bg border-2 border-nb-ink rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 bg-nb-bg border-2 border-nb-ink rounded-lg flex items-center justify-center shrink-0">
               {isLoading ? (
-                <Loader2 size={18} className="animate-spin text-nb-ink/30" />
+                <Loader2 size={16} className="animate-spin text-nb-ink/30" />
               ) : (
-                <stat.icon size={18} />
+                <stat.icon size={16} className="sm:w-[18px] sm:h-[18px]" />
               )}
             </div>
-            <div>
-              <p className="text-xs font-mono text-nb-ink/50 uppercase whitespace-nowrap">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs font-mono text-nb-ink/50 uppercase truncate">
                 {stat.label}
               </p>
               {stat.badge ? (
-                <span className={`nb-badge ${stat.badgeColor} mt-0.5`}>{stat.value}</span>
+                <span className={`nb-badge ${stat.badgeColor} mt-0.5 text-[10px] sm:text-xs`}>{stat.value}</span>
               ) : (
-                <p className="font-display font-bold text-lg whitespace-nowrap">{stat.value}</p>
+                <p className="font-display font-bold text-base sm:text-lg truncate">{stat.value}</p>
               )}
             </div>
           </motion.div>

@@ -54,11 +54,11 @@ export default function EpochTimeline() {
   return (
     <div className="space-y-6">
       {/* Evolution Chart */}
-      <div className="nb-card p-6">
-        <h3 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
-          <TrendingUp size={20} /> Fitness Evolution
+      <div className="nb-card p-4 sm:p-6">
+        <h3 className="font-display font-bold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
+          <TrendingUp size={18} /> Fitness Evolution
         </h3>
-        <div className="h-48">
+        <div className="h-36 sm:h-48">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={epochs}>
               <defs>
@@ -103,11 +103,11 @@ export default function EpochTimeline() {
       {/* Population + Births/Deaths */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Population Over Time */}
-        <div className="nb-card p-6">
-          <h3 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
+        <div className="nb-card p-4 sm:p-6">
+          <h3 className="font-display font-bold text-sm mb-2 sm:mb-3 flex items-center gap-2">
             <Users size={16} /> Population
           </h3>
-          <div className="h-36">
+          <div className="h-28 sm:h-36">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={epochs}>
                 <defs>
@@ -149,11 +149,11 @@ export default function EpochTimeline() {
         </div>
 
         {/* Births & Deaths Bar Chart */}
-        <div className="nb-card p-6">
-          <h3 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
+        <div className="nb-card p-4 sm:p-6">
+          <h3 className="font-display font-bold text-sm mb-2 sm:mb-3 flex items-center gap-2">
             <GitBranch size={16} /> Births &amp; <Skull size={16} /> Deaths
           </h3>
-          <div className="h-36">
+          <div className="h-28 sm:h-36">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={epochs} barGap={2}>
                 <XAxis
@@ -205,7 +205,7 @@ export default function EpochTimeline() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.05 }}
-              className="bg-nb-card border-3 border-nb-ink rounded-nb px-5 py-4 min-w-[160px] shadow-nb-sm hover:-translate-y-1 hover:shadow-nb transition-all"
+              className="bg-nb-card border-3 border-nb-ink rounded-nb px-4 sm:px-5 py-3 sm:py-4 min-w-[140px] sm:min-w-[160px] shadow-nb-sm hover:-translate-y-1 hover:shadow-nb transition-all"
             >
               <p className="font-display font-bold text-xl mb-3">E{ep.epoch}</p>
               <div className="space-y-2 text-xs font-mono">

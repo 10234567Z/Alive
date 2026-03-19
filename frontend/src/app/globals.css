@@ -130,3 +130,24 @@ code, pre {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* ── Mobile refinements ───────────────────────────────────── */
+
+@media (max-width: 639px) {
+  .nb-card {
+    box-shadow: var(--shadow-nb-sm);
+  }
+  .nb-card:hover {
+    transform: none;
+    box-shadow: var(--shadow-nb-sm);
+  }
+  .nb-btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    box-shadow: 2px 2px 0 0 rgba(0, 0, 0, 0.9);
+  }
+  .nb-btn:hover {
+    transform: none;
+    box-shadow: 2px 2px 0 0 rgba(0, 0, 0, 0.9);
+  }
+}

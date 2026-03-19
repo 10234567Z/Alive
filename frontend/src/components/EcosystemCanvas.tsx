@@ -216,7 +216,7 @@ export default function EcosystemCanvas() {
   return (
     <canvas
       ref={canvasRef}
-      className="w-full h-[500px] rounded-nb"
+      className="w-full h-[300px] sm:h-[400px] lg:h-[500px] rounded-nb"
       onMouseMove={handleMouseMove}
       onClick={handleClick}
     />

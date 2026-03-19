@@ -30,14 +30,14 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-nb-bg border-b-3 border-nb-ink">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 bg-nb-accent border-3 border-nb-ink rounded-nb shadow-nb-sm flex items-center justify-center font-display font-bold text-lg group-hover:-translate-y-0.5 transition-transform">
+          <Link href="/" className="flex items-center gap-1.5 sm:gap-2 group">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-nb-accent border-3 border-nb-ink rounded-nb shadow-nb-sm flex items-center justify-center font-display font-bold text-base sm:text-lg group-hover:-translate-y-0.5 transition-transform">
               A
             </div>
-            <span className="font-display font-bold text-xl tracking-tight">
+            <span className="font-display font-bold text-lg sm:text-xl tracking-tight hidden xs:inline">
               ALIVE
             </span>
             {isLoading && (
@@ -46,7 +46,7 @@ export default function Header() {
           </Link>
 
           {/* Nav */}
-          <nav className="flex items-center gap-2">
+          <nav className="flex items-center gap-1 sm:gap-2">
             {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
               const isActive = pathname === href;
               return (
@@ -54,8 +54,8 @@ export default function Header() {
                   key={href}
                   href={href}
                   className={`
-                    flex items-center gap-1.5 px-4 py-2 font-display font-medium text-sm
-                    border-3 border-nb-ink rounded-nb transition-all
+                    flex items-center gap-1 sm:gap-1.5 px-2 sm:px-4 py-1.5 sm:py-2 font-display font-medium text-xs sm:text-sm
+                    border-2 sm:border-3 border-nb-ink rounded-nb transition-all
                     ${
                       isActive
                         ? "bg-nb-accent shadow-nb-sm -translate-y-0.5"
@@ -63,7 +63,7 @@ export default function Header() {
                     }
                   `}
                 >
-                  <Icon size={16} />
+                  <Icon size={14} className="sm:w-4 sm:h-4" />
                   <span className="hidden sm:inline">{label}</span>
                 </Link>
               );
@@ -73,20 +73,20 @@ export default function Header() {
           {/* Wallet */}
           <button
             onClick={handleWallet}
-            className={`nb-btn text-sm ${isConnected ? "nb-btn-secondary" : "nb-btn-primary"}`}
+            className={`nb-btn text-xs sm:text-sm ${isConnected ? "nb-btn-secondary" : "nb-btn-primary"}`}
           >
             {isConnecting ? (
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2 size={14} className="animate-spin" />
             ) : (
-              <BarChart3 size={16} />
+              <BarChart3 size={14} className="sm:w-4 sm:h-4" />
             )}
             <span className="hidden sm:inline">
               {isConnected && address
                 ? `${address.slice(0, 6)}...${address.slice(-4)}`
                 : "Connect Wallet"}
             </span>
-            <span className="sm:hidden">
-              {isConnected ? "Connected" : "Connect"}
+            <span className="sm:hidden text-xs">
+              {isConnected ? address?.slice(0, 4) + "…" : "Connect"}
             </span>
           </button>
         </div>

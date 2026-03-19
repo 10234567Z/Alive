@@ -48,7 +48,7 @@ export default function DashboardPage() {
           <LayoutDashboard size={24} />
         </div>
         <div>
-          <h1 className="font-display font-bold text-3xl">Dashboard</h1>
+          <h1 className="font-display font-bold text-2xl sm:text-3xl">Dashboard</h1>
           <p className="text-nb-ink/60">Your position &amp; ecosystem analytics</p>
         </div>
       </motion.div>
@@ -65,18 +65,18 @@ export default function DashboardPage() {
         {/* Right — Analytics */}
         <div className="lg:col-span-2 space-y-6">
           {/* Overview Cards */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 }}
-              className="nb-card p-5"
+              className="nb-card p-4 sm:p-5"
             >
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-1 sm:mb-2">
                 <Activity size={16} className="text-nb-accent" />
                 <p className="text-xs font-mono text-nb-ink/50 uppercase">Avg Fitness</p>
               </div>
-              <p className="font-display font-bold text-2xl">
+              <p className="font-display font-bold text-xl sm:text-2xl">
                 {avgFitness.toFixed(0)}
               </p>
             </motion.div>
@@ -85,13 +85,13 @@ export default function DashboardPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.15 }}
-              className="nb-card p-5"
+              className="nb-card p-4 sm:p-5"
             >
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-1 sm:mb-2">
                 <TrendingUp size={16} className="text-nb-ok" />
                 <p className="text-xs font-mono text-nb-ink/50 uppercase">Avg Lifespan</p>
               </div>
-              <p className="font-display font-bold text-2xl">
+              <p className="font-display font-bold text-xl sm:text-2xl">
                 {avgEpochs.toFixed(1)} <span className="text-sm font-normal text-nb-ink/50">epochs</span>
               </p>
             </motion.div>
@@ -100,13 +100,13 @@ export default function DashboardPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
-              className="nb-card p-5"
+              className="nb-card p-4 sm:p-5"
             >
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-1 sm:mb-2">
                 <PieChart size={16} className="text-nb-purple" />
                 <p className="text-xs font-mono text-nb-ink/50 uppercase">TVL Active</p>
               </div>
-              <p className="font-display font-bold text-2xl">
+              <p className="font-display font-bold text-xl sm:text-2xl">
                 ${(totalBalance / 1e6).toLocaleString("en-US", { maximumFractionDigits: 0 })}
               </p>
             </motion.div>

@@ -64,7 +64,7 @@ export default function PitchDeck() {
       {/* Slide content */}
       <div className="flex-1 relative overflow-hidden">
         <AnimatePresence mode="wait">
-          <motion.div key={slide} {...fadeSlide} className="absolute inset-0 flex items-center justify-center p-8">
+          <motion.div key={slide} {...fadeSlide} className="absolute inset-0 flex items-center justify-center p-4 sm:p-8 overflow-y-auto">
             {slide === 0 && <TitleSlide />}
             {slide === 1 && <ProblemSlide />}
             {slide === 2 && <SolutionSlide />}
@@ -81,23 +81,23 @@ export default function PitchDeck() {
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between px-8 py-4 border-t-3 border-nb-ink bg-nb-card">
-        <button onClick={prev} disabled={slide === 0} className="nb-btn nb-btn-secondary disabled:opacity-30 disabled:cursor-not-allowed">
-          <ChevronLeft size={20} /> Back
+      <div className="flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4 border-t-3 border-nb-ink bg-nb-card">
+        <button onClick={prev} disabled={slide === 0} className="nb-btn nb-btn-secondary text-sm sm:text-base disabled:opacity-30 disabled:cursor-not-allowed">
+          <ChevronLeft size={18} /> <span className="hidden sm:inline">Back</span>
         </button>
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 sm:gap-2">
           {SLIDES.map((_, i) => (
             <button
               key={i}
               onClick={() => setSlide(i)}
-              className={`w-3 h-3 rounded-full border-2 border-nb-ink transition-all ${
+              className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full border-2 border-nb-ink transition-all ${
                 i === slide ? "bg-nb-ink scale-125" : "bg-nb-bg hover:bg-nb-ink/30"
               }`}
             />
           ))}
         </div>
-        <button onClick={next} disabled={slide === total - 1} className="nb-btn nb-btn-primary disabled:opacity-30 disabled:cursor-not-allowed">
-          Next <ChevronRight size={20} />
+        <button onClick={next} disabled={slide === total - 1} className="nb-btn nb-btn-primary text-sm sm:text-base disabled:opacity-30 disabled:cursor-not-allowed">
+          <span className="hidden sm:inline">Next</span> <ChevronRight size={18} />
         </button>
       </div>
     </div>
@@ -123,13 +123,13 @@ function TitleSlide() {
         </div>
       </motion.div>
 
-      <h1 className="font-display font-bold text-7xl sm:text-9xl tracking-tight">
+      <h1 className="font-display font-bold text-5xl sm:text-7xl lg:text-9xl tracking-tight">
         <span className="inline-block bg-nb-accent border-3 border-nb-ink rounded-nb px-6 py-3 shadow-nb -rotate-1">
           ALIVE
         </span>
       </h1>
 
-      <p className="text-2xl sm:text-3xl text-nb-ink/70 font-display max-w-3xl mx-auto">
+      <p className="text-lg sm:text-2xl lg:text-3xl text-nb-ink/70 font-display max-w-3xl mx-auto">
         Autonomous DeFi creatures that{" "}
         <span className="bg-nb-purple/20 px-2 rounded-lg font-bold text-nb-purple">evolve</span>{" "}
         yield strategies through{" "}
@@ -174,21 +174,21 @@ function ProblemSlide() {
         <span className="nb-badge bg-nb-error/20 text-nb-error text-lg px-4 py-1.5 mb-4 inline-flex">
           <Skull size={18} /> The Problem
         </span>
-        <h2 className="font-display font-bold text-5xl mt-4">DeFi Yield is Broken</h2>
+        <h2 className="font-display font-bold text-3xl sm:text-5xl mt-4">DeFi Yield is Broken</h2>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         {problems.map(({ icon: Icon, text, color }, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.15 }}
-            className="nb-card p-6 flex items-start gap-4"
+            className="nb-card p-4 sm:p-6 flex items-start gap-3 sm:gap-4"
           >
-            <div className={`p-3 ${color} border-2 border-nb-ink rounded-nb shrink-0`}>
-              <Icon size={24} />
+            <div className={`p-2 sm:p-3 ${color} border-2 border-nb-ink rounded-nb shrink-0`}>
+              <Icon size={20} className="sm:w-6 sm:h-6" />
             </div>
-            <p className="text-lg">{text}</p>
+            <p className="text-base sm:text-lg">{text}</p>
           </motion.div>
         ))}
       </div>
@@ -203,37 +203,37 @@ function SolutionSlide() {
         <span className="nb-badge bg-nb-ok/20 text-nb-ok text-lg px-4 py-1.5 mb-4 inline-flex">
           <Sparkles size={18} /> The Solution
         </span>
-        <h2 className="font-display font-bold text-5xl mt-4">
+        <h2 className="font-display font-bold text-3xl sm:text-5xl mt-4">
           Let <span className="bg-nb-accent px-3 rounded-lg">Evolution</span> Do the Work
         </h2>
       </div>
 
-      <div className="nb-card p-8 text-center space-y-6">
-        <p className="text-xl text-nb-ink/80 max-w-3xl mx-auto leading-relaxed">
+      <div className="nb-card p-5 sm:p-8 text-center space-y-6">
+        <p className="text-base sm:text-xl text-nb-ink/80 max-w-3xl mx-auto leading-relaxed">
           ALIVE deploys <span className="font-bold text-nb-purple">autonomous creatures</span> — each with unique DNA
           encoding a yield strategy. They compete for capital across Polkadot parachains.
           <span className="font-bold text-nb-ok"> The fittest survive and breed.</span>{" "}
           The weak die. Strategies evolve every epoch automatically.
         </p>
 
-        <div className="flex justify-center gap-6 pt-4">
+        <div className="flex justify-center gap-4 sm:gap-6 pt-4 flex-wrap">
           <div className="text-center">
-            <div className="text-4xl font-display font-bold text-nb-purple">10+</div>
+            <div className="text-2xl sm:text-4xl font-display font-bold text-nb-purple">10+</div>
             <div className="text-sm text-nb-ink/60">DNA Genes</div>
           </div>
-          <div className="w-px bg-nb-ink/20" />
+          <div className="w-px bg-nb-ink/20 hidden sm:block" />
           <div className="text-center">
-            <div className="text-4xl font-display font-bold text-nb-accent-2">6</div>
+            <div className="text-2xl sm:text-4xl font-display font-bold text-nb-accent-2">6</div>
             <div className="text-sm text-nb-ink/60">Parachains</div>
           </div>
-          <div className="w-px bg-nb-ink/20" />
+          <div className="w-px bg-nb-ink/20 hidden sm:block" />
           <div className="text-center">
-            <div className="text-4xl font-display font-bold text-nb-ok">100%</div>
+            <div className="text-2xl sm:text-4xl font-display font-bold text-nb-ok">100%</div>
             <div className="text-sm text-nb-ink/60">On-Chain</div>
           </div>
-          <div className="w-px bg-nb-ink/20" />
+          <div className="w-px bg-nb-ink/20 hidden sm:block" />
           <div className="text-center">
-            <div className="text-4xl font-display font-bold text-nb-pink">0</div>
+            <div className="text-2xl sm:text-4xl font-display font-bold text-nb-pink">0</div>
             <div className="text-sm text-nb-ink/60">Human Input</div>
           </div>
         </div>
@@ -249,7 +249,7 @@ function HowSlide() {
         <span className="nb-badge bg-nb-purple/20 text-nb-purple text-lg px-4 py-1.5 mb-4 inline-flex">
           <Dna size={18} /> How It Works
         </span>
-        <h2 className="font-display font-bold text-5xl mt-4">The Creature DNA</h2>
+        <h2 className="font-display font-bold text-3xl sm:text-5xl mt-4">The Creature DNA</h2>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -302,26 +302,25 @@ function LifecycleSlide() {
         <span className="nb-badge bg-nb-accent-2/20 text-nb-accent-2 text-lg px-4 py-1.5 mb-4 inline-flex">
           <Zap size={18} /> Epoch Lifecycle
         </span>
-        <h2 className="font-display font-bold text-5xl mt-4">Every ~10 Minutes</h2>
+        <h2 className="font-display font-bold text-3xl sm:text-5xl mt-4">Every ~10 Minutes</h2>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-3 items-stretch">
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch">
         {phases.map(({ step, title, desc, icon: Icon, color }, i) => (
           <motion.div
             key={step}
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.12 }}
-            className="flex-1 nb-card p-5 flex flex-col items-center text-center gap-2"
-          >
-            <div className={`w-14 h-14 ${color} border-3 border-nb-ink rounded-nb shadow-nb-sm flex items-center justify-center`}>
-              <Icon size={24} />
+            className="flex-1 nb-card p-4 sm:p-5 flex flex-row sm:flex-col items-center text-center gap-3 sm:gap-2">
+            <div className={`w-10 h-10 sm:w-14 sm:h-14 ${color} border-3 border-nb-ink rounded-nb shadow-nb-sm flex items-center justify-center shrink-0`}>
+              <Icon size={20} className="sm:w-6 sm:h-6" />
             </div>
             <div className="font-mono text-xs text-nb-ink/40">{step}</div>
-            <div className="font-display font-bold text-lg">{title}</div>
-            <p className="text-sm text-nb-ink/60">{desc}</p>
+            <div className="font-display font-bold text-base sm:text-lg">{title}</div>
+            <p className="text-xs sm:text-sm text-nb-ink/60">{desc}</p>
             {i < phases.length - 1 && (
-              <ArrowRight size={16} className="text-nb-ink/30 hidden md:block absolute -right-5 top-1/2" />
+              <ArrowRight size={16} className="text-nb-ink/30 hidden sm:block absolute -right-5 top-1/2" />
             )}
           </motion.div>
         ))}
@@ -350,7 +349,7 @@ function ArchitectureSlide() {
         <span className="nb-badge bg-nb-pink/20 text-nb-pink text-lg px-4 py-1.5 mb-4 inline-flex">
           <Shield size={18} /> Architecture
         </span>
-        <h2 className="font-display font-bold text-5xl mt-4">6 Smart Contracts</h2>
+        <h2 className="font-display font-bold text-3xl sm:text-5xl mt-4">6 Smart Contracts</h2>
         <p className="text-lg text-nb-ink/60 mt-2">All deployed on Polkadot Hub TestNet (Chain 420420417)</p>
       </div>
 
@@ -399,10 +398,10 @@ function TechSlide() {
         <span className="nb-badge bg-nb-accent/30 text-lg px-4 py-1.5 mb-4 inline-flex">
           <Cpu size={18} /> Tech Stack
         </span>
-        <h2 className="font-display font-bold text-5xl mt-4">Built Different</h2>
+        <h2 className="font-display font-bold text-3xl sm:text-5xl mt-4">Built Different</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
         {stack.map(({ layer, items, color }, i) => (
           <motion.div
             key={layer}
@@ -448,41 +447,41 @@ function DemoSlide() {
         <span className="nb-badge bg-nb-ok/20 text-nb-ok text-lg px-4 py-1.5 mb-4 inline-flex">
           <Zap size={18} /> Live Demo
         </span>
-        <h2 className="font-display font-bold text-5xl mt-4">See It Live</h2>
+        <h2 className="font-display font-bold text-3xl sm:text-5xl mt-4">See It Live</h2>
       </div>
 
-      <div className="nb-card p-8 space-y-6">
-        <p className="text-xl text-nb-ink/70">
+      <div className="nb-card p-5 sm:p-8 space-y-6">
+        <p className="text-base sm:text-xl text-nb-ink/70">
           ALIVE is running <span className="font-bold text-nb-ok">right now</span> on Polkadot Hub TestNet.
           Creatures are competing. Evolution is happening. Yield is being generated.
         </p>
 
-        <div className="grid grid-cols-3 gap-4">
-          <div className="nb-card p-4 shadow-nb-sm!">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          <div className="nb-card p-3 sm:p-4 shadow-nb-sm!">
             <div className="font-mono text-xs text-nb-ink/40">DEPOSITED</div>
-            <div className="font-display font-bold text-2xl text-nb-ok">100K+ USDC</div>
+            <div className="font-display font-bold text-xl sm:text-2xl text-nb-ok">100K+ USDC</div>
           </div>
-          <div className="nb-card p-4 shadow-nb-sm!">
+          <div className="nb-card p-3 sm:p-4 shadow-nb-sm!">
             <div className="font-mono text-xs text-nb-ink/40">CREATURES</div>
-            <div className="font-display font-bold text-2xl text-nb-purple">10+</div>
+            <div className="font-display font-bold text-xl sm:text-2xl text-nb-purple">10+</div>
           </div>
-          <div className="nb-card p-4 shadow-nb-sm!">
+          <div className="nb-card p-3 sm:p-4 shadow-nb-sm!">
             <div className="font-mono text-xs text-nb-ink/40">EPOCHS</div>
-            <div className="font-display font-bold text-2xl text-nb-accent-2">Auto-advancing</div>
+            <div className="font-display font-bold text-xl sm:text-2xl text-nb-accent-2">Auto-advancing</div>
           </div>
         </div>
 
-        <div className="flex justify-center gap-4">
-          <Link href="/" className="nb-btn nb-btn-primary text-lg">
-            <Dna size={20} /> Open Dashboard <ExternalLink size={16} />
+        <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+          <Link href="/" className="nb-btn nb-btn-primary text-base sm:text-lg">
+            <Dna size={18} /> Open Dashboard <ExternalLink size={14} />
           </Link>
           <a
             href="https://blockscout-testnet.polkadot.io/address/0xdf422894281A27Aa3d19B0B7D578c59Cb051ABF8"
             target="_blank"
             rel="noopener noreferrer"
-            className="nb-btn nb-btn-secondary text-lg"
+            className="nb-btn nb-btn-secondary text-base sm:text-lg"
           >
-            <Shield size={20} /> View on Explorer <ExternalLink size={16} />
+            <Shield size={18} /> View on Explorer <ExternalLink size={14} />
           </a>
         </div>
       </div>
@@ -497,11 +496,11 @@ function MarketSlide() {
         <span className="nb-badge bg-nb-accent-2/20 text-nb-accent-2 text-lg px-4 py-1.5 mb-4 inline-flex">
           <TrendingUp size={18} /> Why Now
         </span>
-        <h2 className="font-display font-bold text-5xl mt-4">The Opportunity</h2>
+        <h2 className="font-display font-bold text-3xl sm:text-5xl mt-4">The Opportunity</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="nb-card p-6 space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="nb-card p-4 sm:p-6 space-y-3">
           <div className="w-12 h-12 bg-nb-accent border-3 border-nb-ink rounded-nb shadow-nb-sm flex items-center justify-center">
             <Globe size={24} />
           </div>
@@ -509,7 +508,7 @@ function MarketSlide() {
           <p className="text-nb-ink/60">Cross-chain messaging enables real multi-chain DeFi strategies for the first time on Polkadot.</p>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="nb-card p-6 space-y-3">
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="nb-card p-4 sm:p-6 space-y-3">
           <div className="w-12 h-12 bg-nb-purple border-3 border-nb-ink rounded-nb shadow-nb-sm flex items-center justify-center">
             <Brain size={24} />
           </div>
@@ -517,7 +516,7 @@ function MarketSlide() {
           <p className="text-nb-ink/60">Gemini 3.1 Pro generates new creature DNA based on real market conditions. Biology meets alpha.</p>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="nb-card p-6 space-y-3">
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="nb-card p-4 sm:p-6 space-y-3">
           <div className="w-12 h-12 bg-nb-pink border-3 border-nb-ink rounded-nb shadow-nb-sm flex items-center justify-center">
             <Swords size={24} />
           </div>
@@ -541,10 +540,10 @@ function TeamSlide() {
         <span className="nb-badge bg-nb-purple/20 text-nb-purple text-lg px-4 py-1.5 mb-4 inline-flex">
           <Users size={18} /> The Builder
         </span>
-        <h2 className="font-display font-bold text-5xl mt-4">Solo Hacker</h2>
+        <h2 className="font-display font-bold text-3xl sm:text-5xl mt-4">Solo Hacker</h2>
       </div>
 
-      <div className="nb-card p-8 max-w-lg mx-auto space-y-4">
+      <div className="nb-card p-5 sm:p-8 max-w-lg mx-auto space-y-4">
         <div className="w-24 h-24 mx-auto bg-nb-accent border-3 border-nb-ink rounded-nb shadow-nb flex items-center justify-center text-4xl font-display font-bold">
           H
         </div>
@@ -570,26 +569,26 @@ function CTASlide() {
         animate={{ scale: [1, 1.05, 1] }}
         transition={{ repeat: Infinity, duration: 2 }}
       >
-        <h1 className="font-display font-bold text-6xl sm:text-8xl">
-          <span className="inline-block bg-nb-accent border-3 border-nb-ink rounded-nb px-6 py-3 shadow-nb">
+        <h1 className="font-display font-bold text-4xl sm:text-6xl lg:text-8xl">
+          <span className="inline-block bg-nb-accent border-3 border-nb-ink rounded-nb px-4 sm:px-6 py-2 sm:py-3 shadow-nb">
             ALIVE
           </span>
         </h1>
       </motion.div>
 
-      <p className="text-2xl text-nb-ink/70 font-display max-w-2xl mx-auto">
+      <p className="text-lg sm:text-2xl text-nb-ink/70 font-display max-w-2xl mx-auto">
         Evolution never stops. Neither should your yield.
       </p>
 
-      <div className="flex flex-wrap justify-center gap-4">
-        <Link href="/" className="nb-btn nb-btn-primary text-xl px-8 py-4">
-          <Dna size={24} /> Try the Live App
+      <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4">
+        <Link href="/" className="nb-btn nb-btn-primary text-lg sm:text-xl px-6 sm:px-8 py-3 sm:py-4">
+          <Dna size={22} /> Try the Live App
         </Link>
         <a
           href="https://github.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="nb-btn nb-btn-secondary text-xl px-8 py-4"
+          className="nb-btn nb-btn-secondary text-lg sm:text-xl px-6 sm:px-8 py-3 sm:py-4"
         >
           <GitBranch size={24} /> View Source
         </a>

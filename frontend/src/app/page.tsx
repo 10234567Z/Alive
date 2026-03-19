@@ -15,7 +15,7 @@ export default function Home() {
     <div className="space-y-8 pb-12">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-6 sm:pb-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -31,13 +31,13 @@ export default function Home() {
               <Sparkles size={18} /> Artificial Life Ecosystem
             </motion.div>
 
-            <h1 className="font-display font-bold text-5xl sm:text-7xl tracking-tight">
+            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-7xl tracking-tight">
               <span className="inline-block bg-nb-accent border-3 border-nb-ink rounded-nb px-3 py-1 shadow-nb-sm -rotate-1">
                 ALIVE
               </span>
             </h1>
 
-            <p className="text-xl text-nb-ink/70 max-w-2xl mx-auto font-body">
+            <p className="text-base sm:text-xl text-nb-ink/70 max-w-2xl mx-auto font-body">
               Autonomous DeFi creatures evolve optimal yield strategies through
               natural selection on <span className="font-semibold text-nb-purple">Polkadot Hub</span>.
               Deposit. Watch them compete. Earn yield from the fittest.
@@ -78,7 +78,7 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="nb-card p-2 sm:p-4">
           <div className="flex items-center justify-between mb-4 px-2">
-            <h2 className="font-display font-bold text-xl flex items-center gap-2">
+            <h2 className="font-display font-bold text-lg sm:text-xl flex items-center gap-2">
               <Dna size={22} /> Live Ecosystem
             </h2>
             <span className="nb-badge bg-nb-ok/20 text-nb-ok">
@@ -95,7 +95,7 @@ export default function Home() {
 
       {/* Epoch Timeline */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="font-display font-bold text-2xl mb-4">Evolution History</h2>
+        <h2 className="font-display font-bold text-xl sm:text-2xl mb-4">Evolution History</h2>
         <EpochTimeline />
       </section>
 
