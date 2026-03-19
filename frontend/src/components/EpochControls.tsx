@@ -111,7 +111,7 @@ export default function EpochControls() {
       ) : (
         <div className="flex items-center gap-2 text-sm font-mono text-green-600">
           <Activity size={14} />
-          <span>Ready — keeper will advance shortly</span>
+          <span>Ready, keeper will advance shortly</span>
         </div>
       )}
     </div>

@@ -138,10 +138,10 @@ function TitleSlide() {
 
       <div className="flex flex-wrap justify-center gap-4 pt-4">
         {[
-          { icon: Dna, label: "Genetic Algorithms", color: "bg-nb-accent/30" },
-          { icon: Cpu, label: "PolkaVM Evolution", color: "bg-nb-purple/20" },
-          { icon: Globe, label: "XCM Cross-Chain", color: "bg-nb-accent-2/20" },
-          { icon: GitBranch, label: "On-Chain Breeding", color: "bg-nb-pink/20" },
+          { icon: Dna, label: "Self-Evolving", color: "bg-nb-accent/30" },
+          { icon: Cpu, label: "Fully On-Chain", color: "bg-nb-purple/20" },
+          { icon: Globe, label: "Multi-Chain", color: "bg-nb-accent-2/20" },
+          { icon: GitBranch, label: "Zero Maintenance", color: "bg-nb-pink/20" },
         ].map(({ icon: Icon, label, color }) => (
           <motion.span
             key={label}
@@ -155,17 +155,17 @@ function TitleSlide() {
         ))}
       </div>
 
-      <p className="text-sm text-nb-ink/40 font-mono">Track 1: EVM Smart Contract Track</p>
+      <p className="text-sm text-nb-ink/40 font-mono">Polkadot Solidity Hackathon 2026</p>
     </SlideBox>
   );
 }
 
 function ProblemSlide() {
   const problems = [
-    { icon: TrendingUp, text: "DeFi users manually chase yield across chains — it's exhausting", color: "bg-nb-error/20" },
-    { icon: Brain, text: "Most yield strategies are static. Markets change, strategies don't", color: "bg-nb-warn/20" },
-    { icon: Users, text: "Only whales with bots can efficiently optimize cross-chain yield", color: "bg-nb-pink/20" },
-    { icon: Shield, text: "No adaptive system exists that evolves strategies based on real performance", color: "bg-nb-purple/20" },
+    { icon: TrendingUp, text: "DeFi users manually chase yield across chains. It is exhausting.", color: "bg-nb-error/20" },
+    { icon: Brain, text: "Most yield strategies are static. Markets change, strategies don't.", color: "bg-nb-warn/20" },
+    { icon: Users, text: "Only whales with bots can efficiently optimize cross-chain yield.", color: "bg-nb-pink/20" },
+    { icon: Shield, text: "No adaptive system exists that evolves strategies based on real performance.", color: "bg-nb-purple/20" },
   ];
 
   return (
@@ -210,8 +210,8 @@ function SolutionSlide() {
 
       <div className="nb-card p-5 sm:p-8 text-center space-y-6">
         <p className="text-base sm:text-xl text-nb-ink/80 max-w-3xl mx-auto leading-relaxed">
-          ALIVE deploys <span className="font-bold text-nb-purple">autonomous creatures</span> — each with unique DNA
-          encoding a yield strategy. They compete for capital across Polkadot parachains.
+          ALIVE deploys <span className="font-bold text-nb-purple">autonomous creatures</span>, each with unique DNA
+          encoding a yield strategy. They compete for capital across multiple chains.
           <span className="font-bold text-nb-ok"> The fittest survive and breed.</span>{" "}
           The weak die. Strategies evolve every epoch automatically.
         </p>
@@ -255,7 +255,7 @@ function HowSlide() {
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
           { gene: "targetChain", desc: "Which parachain", example: "Moonbeam", color: "bg-nb-accent" },
-          { gene: "poolType", desc: "Strategy type", example: "AMM LP", color: "bg-nb-accent-2" },
+          { gene: "poolType", desc: "Strategy type", example: "Liquidity", color: "bg-nb-accent-2" },
           { gene: "allocation", desc: "Capital ratio", example: "70%", color: "bg-nb-purple" },
           { gene: "riskCeiling", desc: "Max risk level", example: "3/10", color: "bg-nb-error/60" },
           { gene: "yieldFloor", desc: "Min yield target", example: "5%", color: "bg-nb-ok" },
@@ -290,8 +290,8 @@ function HowSlide() {
 function LifecycleSlide() {
   const phases = [
     { step: "01", title: "DEPOSIT", desc: "Users deposit USDC into the ecosystem vault", icon: Coins, color: "bg-nb-accent" },
-    { step: "02", title: "FEED", desc: "Creatures deploy capital to parachains via XCM", icon: Globe, color: "bg-nb-accent-2" },
-    { step: "03", title: "HARVEST", desc: "XCM returns yield from DeFi protocols", icon: TrendingUp, color: "bg-nb-ok" },
+    { step: "02", title: "FEED", desc: "Creatures deploy capital across chains", icon: Globe, color: "bg-nb-accent-2" },
+    { step: "03", title: "HARVEST", desc: "Yield flows back from DeFi protocols", icon: TrendingUp, color: "bg-nb-ok" },
     { step: "04", title: "EVOLVE", desc: "Fit creatures breed, weak ones die, DNA mutates", icon: Dna, color: "bg-nb-purple" },
     { step: "05", title: "ALLOCATE", desc: "Fittest survivors get more capital next epoch", icon: BarChart3, color: "bg-nb-pink" },
   ];
@@ -327,7 +327,7 @@ function LifecycleSlide() {
       </div>
 
       <div className="nb-badge bg-nb-warn/20 text-nb-warn mx-auto text-base px-4 py-1.5">
-        <Zap size={16} /> Fully autonomous — no human intervention needed
+        <Zap size={16} /> Fully autonomous. No human intervention needed.
       </div>
     </SlideBox>
   );
@@ -335,12 +335,12 @@ function LifecycleSlide() {
 
 function ArchitectureSlide() {
   const contracts = [
-    { name: "Ecosystem.sol", desc: "Vault + epoch orchestrator", lines: "650+", color: "bg-nb-accent" },
-    { name: "Creature.sol", desc: "Autonomous agent with DNA", lines: "200+", color: "bg-nb-accent-2" },
-    { name: "GenePool.sol", desc: "Breeding + seed injection", lines: "150+", color: "bg-nb-purple" },
-    { name: "EvolutionEngine.sol", desc: "Crossover, mutation, selection", lines: "250+", color: "bg-nb-pink" },
-    { name: "XCMRouter.sol", desc: "Cross-chain asset routing", lines: "300+", color: "bg-nb-ok" },
-    { name: "CreatureFactory.sol", desc: "Deterministic creature deployment", lines: "100+", color: "bg-nb-warn" },
+    { name: "Ecosystem", desc: "Manages deposits, epochs, and capital", role: "Core", color: "bg-nb-accent" },
+    { name: "Creature", desc: "Autonomous agent with its own DNA", role: "Agent", color: "bg-nb-accent-2" },
+    { name: "GenePool", desc: "Handles breeding and new creatures", role: "Genetics", color: "bg-nb-purple" },
+    { name: "EvolutionEngine", desc: "Runs crossover, mutation, selection", role: "Evolution", color: "bg-nb-pink" },
+    { name: "XCMRouter", desc: "Routes capital across chains", role: "Router", color: "bg-nb-ok" },
+    { name: "CreatureFactory", desc: "Deploys new creature contracts", role: "Factory", color: "bg-nb-warn" },
   ];
 
   return (
@@ -350,11 +350,11 @@ function ArchitectureSlide() {
           <Shield size={18} /> Architecture
         </span>
         <h2 className="font-display font-bold text-3xl sm:text-5xl mt-4">6 Smart Contracts</h2>
-        <p className="text-lg text-nb-ink/60 mt-2">All deployed on Polkadot Hub TestNet (Chain 420420417)</p>
+        <p className="text-lg text-nb-ink/60 mt-2">All live on Polkadot TestNet</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {contracts.map(({ name, desc, lines, color }, i) => (
+        {contracts.map(({ name, desc, role, color }, i) => (
           <motion.div
             key={name}
             initial={{ opacity: 0, rotateY: 90 }}
@@ -363,7 +363,7 @@ function ArchitectureSlide() {
             className="nb-card p-5"
           >
             <div className={`inline-block ${color} border-2 border-nb-ink rounded-nb px-2 py-0.5 font-mono text-xs mb-2`}>
-              {lines} lines
+              {role}
             </div>
             <h3 className="font-display font-bold">{name}</h3>
             <p className="text-sm text-nb-ink/60">{desc}</p>
@@ -376,14 +376,14 @@ function ArchitectureSlide() {
 
 function TechSlide() {
   const stack = [
-    { layer: "Smart Contracts", items: ["Solidity 0.8.24", "Foundry", "73 Tests"], color: "bg-nb-accent" },
-    { layer: "Evolution Engine", items: ["PolkaVM/Rust", "Genetic Algorithms", "17 Tests"], color: "bg-nb-purple" },
-    { layer: "AI Seeder", items: ["Python", "Gemini 3.1 Pro", "LangChain"], color: "bg-nb-accent-2" },
-    { layer: "Frontend", items: ["Next.js 15", "Framer Motion", "Neo-Brutalist"], color: "bg-nb-pink" },
-    { layer: "Infrastructure", items: ["XCM Routing", "6 Parachains", "Render Deploy"], color: "bg-nb-ok" },
+    { layer: "Smart Contracts", items: ["6 contracts deployed", "73 passing tests", "Fully auditable"], color: "bg-nb-accent" },
+    { layer: "Evolution Engine", items: ["Real genetic algorithms", "Crossover + mutation", "Runs on-chain"], color: "bg-nb-purple" },
+    { layer: "AI Seeder", items: ["Generates new creatures", "Reads market data", "Always exploring"], color: "bg-nb-accent-2" },
+    { layer: "Frontend", items: ["Real-time dashboard", "Live epoch tracking", "Interactive explorer"], color: "bg-nb-pink" },
+    { layer: "Multi-Chain", items: ["6 target chains", "Cross-chain routing", "Auto-deployed"], color: "bg-nb-ok" },
   ];
 
-  const parachains = [
+  const chains = [
     { name: "Asset Hub", id: 0 },
     { name: "Moonbeam", id: 1 },
     { name: "Acala", id: 2 },
@@ -421,9 +421,9 @@ function TechSlide() {
       </div>
 
       <div className="nb-card p-4">
-        <h3 className="font-display font-bold text-center mb-3">Target Parachains</h3>
+        <h3 className="font-display font-bold text-center mb-3">Supported Chains</h3>
         <div className="flex flex-wrap justify-center gap-3">
-          {parachains.map(({ name, id }, i) => (
+          {chains.map(({ name, id }, i) => (
             <motion.span
               key={name}
               initial={{ scale: 0 }}
@@ -513,7 +513,7 @@ function MarketSlide() {
             <Brain size={24} />
           </div>
           <h3 className="font-display font-bold text-xl">AI Meets DeFi</h3>
-          <p className="text-nb-ink/60">Gemini 3.1 Pro generates new creature DNA based on real market conditions. Biology meets alpha.</p>
+          <p className="text-nb-ink/60">AI generates fresh creature DNA based on real market conditions. Biology meets alpha.</p>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="nb-card p-4 sm:p-6 space-y-3">
@@ -521,7 +521,7 @@ function MarketSlide() {
             <Swords size={24} />
           </div>
           <h3 className="font-display font-bold text-xl">Autonomous Agents</h3>
-          <p className="text-nb-ink/60">Self-sustaining ecosystem with keeper bots + AI seeder. Zero maintenance after deployment.</p>
+          <p className="text-nb-ink/60">Self-sustaining ecosystem that runs itself. Zero maintenance after deployment.</p>
         </motion.div>
       </div>
 
@@ -549,11 +549,11 @@ function TeamSlide() {
         </div>
         <h3 className="font-display font-bold text-2xl">Harsh</h3>
         <p className="text-nb-ink/60">
-          Full-stack builder. Solidity, Rust, Python, Next.js — the entire ALIVE protocol
-          built solo in one hackathon sprint.
+          Full-stack builder. Contracts, backend, AI, and frontend.
+          The entire ALIVE protocol built solo in one hackathon sprint.
         </p>
         <div className="flex flex-wrap justify-center gap-2">
-          {["Solidity", "Rust", "Python", "Next.js", "Foundry", "web3.py", "LangChain", "Framer Motion"].map((skill) => (
+          {["Smart Contracts", "Systems", "AI / ML", "Full-Stack Web", "DevOps"].map((skill) => (
             <span key={skill} className="nb-badge bg-nb-bg text-xs">{skill}</span>
           ))}
         </div>
@@ -585,7 +585,7 @@ function CTASlide() {
           <Dna size={22} /> Try the Live App
         </Link>
         <a
-          href="https://github.com"
+          href="https://github.com/10234567Z/Alive"
           target="_blank"
           rel="noopener noreferrer"
           className="nb-btn nb-btn-secondary text-lg sm:text-xl px-6 sm:px-8 py-3 sm:py-4"
@@ -595,7 +595,7 @@ function CTASlide() {
       </div>
 
       <div className="space-y-2 text-nb-ink/40 font-mono text-sm">
-        <p>6 Contracts  ·  73 Tests  ·  PolkaVM + XCM  ·  AI-Powered Seeding</p>
+        <p>6 Contracts  ·  73 Tests  ·  Multi-Chain  ·  AI-Powered</p>
         <p>Built for Polkadot Solidity Hackathon 2026</p>
       </div>
     </SlideBox>

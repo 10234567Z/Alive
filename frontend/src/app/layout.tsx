@@ -7,7 +7,7 @@ import Web3Provider from "@/components/Web3Provider";
 import ChainSync from "@/components/ChainSync";
 
 export const metadata: Metadata = {
-  title: "ALIVE — Evolutionary DeFi on Polkadot",
+  title: "ALIVE | Evolutionary DeFi on Polkadot",
   description:
     "Autonomous Creatures compete for yield. Genetic algorithms evolve optimal DeFi strategies on-chain.",
 };
