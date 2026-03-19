@@ -177,7 +177,7 @@ Files:
 
 Compilation target: `riscv32im-unknown-none-elf` (PolkaVM).
 
-This module is the Track 2 submission. EVM contracts call Rust functions through the PVM precompile. The genetic algorithm logic runs natively on RISC-V, not interpreted as EVM bytecode.
+EVM contracts call Rust functions through the PVM precompile. The genetic algorithm logic runs natively on RISC-V, not interpreted as EVM bytecode.
 
 ### Module 3: AI Seeder (Python)
 
@@ -185,7 +185,7 @@ Directory: `ai-seeder/`
 
 Files:
 - `seeder.py` — Main loop. Monitors the Ecosystem for population metrics (diversity index, average fitness, population count). When diversity drops below threshold or population is too small, generates new Creature DNA.
-- `dna_generator.py` — Uses an LLM (OpenAI/Claude via LangChain) to generate novel strategy parameter sets. Prompt includes current market conditions and existing population DNA to ensure diversity.
+- `dna_generator.py` — Uses Google Gemini via LangChain to generate novel strategy parameter sets. Prompt includes current market conditions and existing population DNA to ensure diversity.
 - `market_scanner.py` — Queries parachain RPCs for current yield opportunities, TVL, and pool metadata. Feeds data to the LLM as context.
 - `submitter.py` — Signs and submits transactions to the Ecosystem contract to inject new seed Creatures.
 - `config.py` — Configuration: RPC URLs, contract addresses, API keys (loaded from `.env`).
@@ -230,7 +230,7 @@ Deployment:
 |---|---|
 | Smart Contracts | Solidity 0.8.24, Foundry |
 | PVM Module | Rust (`no_std`), compiled to RISC-V for PolkaVM |
-| AI Seeder | Python, LangChain, OpenAI API |
+| AI Seeder | Python, LangChain, Google Gemini |
 | Cross-chain | XCM precompile on Polkadot Hub + SCALE codec |
 | Frontend | Next.js 16, TypeScript, wagmi, viem, Recharts, Framer Motion |
 | Testing | Foundry (73 tests), Rust (17 tests) |
@@ -266,6 +266,7 @@ polka/
 │   ├── script/
 │   │   ├── Deploy.s.sol             # Local deployment
 │   │   ├── DeployProduction.s.sol   # Polkadot Hub TestNet deployment
+│   │   ├── Deposit.s.sol            # Deposit utility script
 │   │   └── SpawnCreatures.s.sol     # Spawn initial population
 │   └── foundry.toml
 ├── pvm/
@@ -294,7 +295,9 @@ polka/
 │   │   └── lib/                     # Types, contracts, utilities
 │   └── package.json
 ├── keeper/
-│   └── epoch-keeper.sh              # Automated epoch advancement
+│   ├── keeper.py                     # Python epoch keeper daemon
+│   ├── epoch-keeper.sh              # Shell epoch keeper script
+│   └── requirements.txt
 ├── scripts/
 │   ├── deploy.sh                    # Testnet deployment
 │   ├── seed.sh                      # AI Seeder runner
@@ -302,7 +305,7 @@ polka/
 │   └── epoch-runner.sh              # Epoch simulation
 ├── docs/
 │   └── ARCHITECTURE.md
-├── deliverables.md
+├── render.yaml                       # Render deployment blueprint
 └── README.md
 ```
 
@@ -311,8 +314,8 @@ polka/
 ## Getting Started
 
 ```bash
-git clone https://github.com/<your-repo>/polka.git
-cd polka
+git clone https://github.com/10234567Z/Alive.git
+cd Alive
 
 # Contracts
 cd contracts
