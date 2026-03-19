@@ -1,0 +1,536 @@
+{
+  "meta": {
+    "spec_version": "1.0.1",
+    "title": "FlashFlow Protocol — Universal Cash Flow Tokenization Platform",
+    "author": "ETH New Delhi Hackathon",
+    "description": "Build a production-quality frontend for FlashFlow Protocol: tokenized receivables across 5 use cases (Invoices, SaaS, Creators, Rentals, Luxury Assets) with AI risk scoring and DID reputation. Neo-Brutalist design with mock blockchain integration.",
+    "framework": {
+      "name": "React.js",
+      "app_router": true,
+      "typescript": false,
+      "javascript": true,
+      "react_server_components": true
+    }
+  },
+  "tech_stack": {
+    "styling": "TailwindCSS (Neo-Brutalism)",
+    "ui_kit": ["shadcn/ui", "lucide-react", "recharts"],
+    "state": "Zustand + URL params",
+    "forms": "react-hook-form + zod",
+    "routing": "React.js app router",
+    "mock_api": "In-memory services + MSW",
+    "notifications": "sonner",
+    "images": "react/image with local assets",
+    "animations": "framer-motion"
+  },
+  "design_language": {
+    "theme_name": "Neo-Brutalism",
+    "tailwind_overrides": {
+      "theme": {
+        "extend": {
+          "colors": {
+            "nb-bg": "#F7F5F2",
+            "nb-ink": "#111111",
+            "nb-accent": "#6EE7B7",
+            "nb-accent-2": "#60A5FA",
+            "nb-warn": "#F59E0B",
+            "nb-error": "#EF4444",
+            "nb-ok": "#10B981",
+            "nb-card": "#FFFFFF",
+            "nb-purple": "#A855F7",
+            "nb-pink": "#EC4899"
+          },
+          "boxShadow": {
+            "nb": "8px 8px 0 0 rgba(0,0,0,0.9)",
+            "nb-sm": "4px 4px 0 0 rgba(0,0,0,0.9)",
+            "nb-inset": "inset 0 0 0 3px #111",
+            "nb-hover": "12px 12px 0 0 rgba(0,0,0,0.9)"
+          },
+          "borderRadius": {
+            "nb": "1.25rem"
+          },
+          "fontFamily": {
+            "display": ["Space Grotesk", "system-ui", "sans-serif"],
+            "body": ["Inter", "system-ui", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    },
+    "neo_brutalism_rules": [
+      "Thick 3px borders on all interactive elements",
+      "High-contrast solid colors, no gradients except for emphasis",
+      "Offset drop shadows creating 3D sticker effect",
+      "Large punchy headings with Space Grotesk font",
+      "Generous padding and rounded corners",
+      "Hover animations: -translate-y-1 and shadow-nb-hover",
+      "Active state: translate-y-0 to simulate button press",
+      "Focus states: ring-4 ring-nb-accent/50"
+    ]
+  },
+  "app_structure": {
+    "root_layout": {
+      "header": [
+        "FlashFlow Logo with animated gradient",
+        "Nav: Home | Get Cash | Invest | Dashboard | How It Works",
+        "Self.xyz Connect Button (mock KYC status indicator)",
+        "Network indicator (Polygon/Arbitrum mock)"
+      ],
+      "footer": [
+        "© 2025 FlashFlow Protocol",
+        "Links: Docs | GitHub | Discord",
+        "Risk Score: Live (mock WebSocket indicator)"
+      ]
+    },
+    "routes": [
+      {
+        "path": "/",
+        "title": "Home",
+        "purpose": "Landing page showcasing the protocol",
+        "sections": [
+          "Hero: 'Turn Tomorrow's Cash Into Today's Capital' with animated cash flow visualization",
+          "Stats ticker: $X locked | Y investors | Z% APY average",
+          "5 Use Case Cards with hover animations",
+          "How It Works: 3-step flow diagram",
+          "Trust indicators: 'Powered by Self.xyz DID' | 'AI Risk Oracle' | 'DAO Governance'",
+          "Live basket performance chart (mock data streaming)"
+        ]
+      },
+      {
+        "path": "/get-cash",
+        "title": "Get Cash Now",
+        "purpose": "Unified interface for all receivables types",
+        "elements": [
+          "Step 1: Select your cash flow type (5 big cards)",
+          "Step 2: Connect data source (QuickBooks/Stripe/YouTube/Property Management/Lease Docs)",
+          "Step 3: AI Analysis showing projected income with confidence score",
+          "Step 4: Offer display with unlock amount, APY, risk score",
+          "Step 5: Confirmation with Self.xyz KYC check",
+          "Success: Animated token distribution visualization"
+        ]
+      },
+      {
+        "path": "/invoices",
+        "title": "Invoice Factoring",
+        "purpose": "B2B invoice tokenization flow",
+        "elements": [
+          "Connect QuickBooks button (mock OAuth)",
+          "Invoice list with status badges",
+          "Bulk selection for basketization",
+          "Risk score per invoice (AI generated)",
+          "Unlock modal with terms",
+          "Live payout tracking"
+        ]
+      },
+      {
+        "path": "/saas",
+        "title": "SaaS MRR Financing",
+        "purpose": "Monetize subscription revenue",
+        "elements": [
+          "Stripe Connect integration (mock)",
+          "MRR chart with 6-month history",
+          "Churn rate and growth metrics",
+          "AI prediction of next 3 months",
+          "Financing calculator slider",
+          "Basket assignment visualization"
+        ]
+      },
+      {
+        "path": "/creators",
+        "title": "Creator Lineups",
+        "purpose": "Creator economy monetization",
+        "elements": [
+          "Platform selector (YouTube/Twitch/TikTok/Spotify)",
+          "Analytics dashboard with earnings projection",
+          "Creator score based on engagement metrics",
+          "Lineup creation (group with similar creators)",
+          "Investor interest gauge",
+          "NFT badge for funded creators"
+        ]
+      },
+      {
+        "path": "/rentals",
+        "title": "Rental Income Streams",
+        "purpose": "Real estate rental tokenization",
+        "elements": [
+          "Property portfolio view",
+          "Lease document upload",
+          "Tenant payment history chart",
+          "Property value and location risk assessment",
+          "Income projection with seasonal adjustments",
+          "Tokenization terms display"
+        ]
+      },
+      {
+        "path": "/luxury",
+        "title": "Luxury Asset Leases",
+        "purpose": "High-value asset lease monetization",
+        "elements": [
+          "Asset gallery (cars, watches, yachts)",
+          "Lease agreement parser (AI)",
+          "Depreciation curve visualization",
+          "Insurance and maintenance factoring",
+          "Collector market sentiment indicator",
+          "Premium basket placement"
+        ]
+      },
+      {
+        "path": "/invest",
+        "title": "Investment Marketplace",
+        "purpose": "Browse and invest in baskets",
+        "sections": [
+          "Filter sidebar: Risk level | APY range | Sector | Duration",
+          "Basket cards grid with live performance sparklines",
+          "Featured baskets: 'Rising Stars' | 'Stable Income' | 'High Yield'",
+          "Detailed basket view with receivables breakdown",
+          "Investment simulator showing projected returns",
+          "One-click invest with wallet mock"
+        ]
+      },
+      {
+        "path": "/baskets/[id]",
+        "title": "Basket Details",
+        "purpose": "Deep dive into specific basket",
+        "elements": [
+          "Composition chart (pie/treemap)",
+          "Individual receivables list with risk scores",
+          "Historical performance graph",
+          "AI risk analysis narrative",
+          "Investor sentiment indicators",
+          "Buy/Sell token interface"
+        ]
+      },
+      {
+        "path": "/dashboard",
+        "title": "Personal Dashboard",
+        "purpose": "User's portfolio and activity",
+        "sections": [
+          "Portfolio value with P&L",
+          "Active positions table",
+          "Earnings calendar showing upcoming payouts",
+          "Risk exposure heatmap",
+          "DID reputation score display",
+          "Transaction history with filters",
+          "Notifications panel for payouts/defaults"
+        ]
+      },
+      {
+        "path": "/ai-oracle",
+        "title": "AI Risk Oracle",
+        "purpose": "Transparency into AI risk scoring",
+        "elements": [
+          "Real-time risk feed (mock WebSocket)",
+          "Risk factor breakdown charts",
+          "Model explanation cards",
+          "Historical accuracy metrics",
+          "Appeals/dispute interface",
+          "Oracle staking rewards display"
+        ]
+      },
+      {
+        "path": "/reputation",
+        "title": "DID Reputation Center",
+        "purpose": "Self.xyz integration showcase",
+        "elements": [
+          "Universal credit score visualization",
+          "Cross-platform reputation history",
+          "Default impact simulator",
+          "Reputation recovery pathways",
+          "Verification badges earned",
+          "Privacy settings for data sharing"
+        ]
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "CashFlowCard",
+      "props": ["type", "amount", "duration", "risk", "apy", "status"],
+      "styles": "nb-card with type-specific accent colors"
+    },
+    {
+      "name": "BasketCard",
+      "props": [
+        "id",
+        "name",
+        "totalValue",
+        "apy",
+        "risk",
+        "composition",
+        "performance"
+      ],
+      "styles": "nb-card with live sparkline chart"
+    },
+    {
+      "name": "RiskScoreBadge",
+      "props": ["score", "trend", "factors"],
+      "styles": "Colored badge with tooltip showing AI factors"
+    },
+    {
+      "name": "TokenizationWizard",
+      "props": ["steps", "currentStep", "data", "onComplete"],
+      "styles": "Multi-step form with progress indicator"
+    },
+    {
+      "name": "PerformanceChart",
+      "props": ["data", "timeframe", "comparison"],
+      "styles": "Recharts line/area chart with neo-brutal styling"
+    },
+    {
+      "name": "DIDWidget",
+      "props": ["address", "score", "verifications"],
+      "styles": "Compact reputation display with Self.xyz branding"
+    },
+    {
+      "name": "AIInsightPanel",
+      "props": ["receivableId", "insights", "confidence"],
+      "styles": "Animated panel with typewriter effect"
+    },
+    {
+      "name": "PayoutTimeline",
+      "props": ["schedule", "received", "pending"],
+      "styles": "Horizontal timeline with status indicators"
+    },
+    {
+      "name": "InvestmentSimulator",
+      "props": ["amount", "basket", "duration"],
+      "styles": "Interactive calculator with live preview"
+    },
+    {
+      "name": "NotificationToast",
+      "props": ["type", "title", "description", "txHash"],
+      "styles": "Sonner toast with mock tx link"
+    }
+  ],
+  "mock_services": {
+    "seed_strategy": "Deterministic faker with 'flashflow-eth-delhi' seed for consistent demo data",
+    "modules": [
+      {
+        "name": "receivablesService",
+        "functions": [
+          "connectDataSource(type, credentials): DataConnection",
+          "fetchReceivables(connectionId): Receivable[]",
+          "analyzeReceivable(id): RiskAnalysis",
+          "tokenizeReceivable(id, amount): Token",
+          "getReceivableStatus(id): Status"
+        ]
+      },
+      {
+        "name": "basketService",
+        "functions": [
+          "createBasket(receivables[], riskTier): Basket",
+          "listBaskets(filters): Basket[]",
+          "getBasketDetails(id): BasketDetail",
+          "investInBasket(id, amount): Investment",
+          "getBasketPerformance(id): Performance"
+        ]
+      },
+      {
+        "name": "aiOracleService",
+        "functions": [
+          "calculateRiskScore(data): RiskScore",
+          "predictCashFlow(historical): Prediction",
+          "monitorPayments(): PaymentEvent[]",
+          "updateScores(): ScoreUpdate[]",
+          "explainRisk(receivableId): Explanation"
+        ]
+      },
+      {
+        "name": "didService",
+        "functions": [
+          "connectSelfXYZ(): DIDConnection",
+          "getReputation(address): Reputation",
+          "recordDefault(address, amount): DefaultRecord",
+          "verifyKYC(address): KYCStatus",
+          "getUniversalScore(address): number"
+        ]
+      },
+      {
+        "name": "payoutService",
+        "functions": [
+          "schedulePayout(receivableId): PayoutSchedule",
+          "processPayout(payoutId): Transaction",
+          "distributeToInvestors(basketId, amount): Distribution",
+          "getPayoutHistory(userId): Payout[]"
+        ]
+      }
+    ],
+    "mock_data_examples": {
+      "invoices": [
+        {
+          "id": "inv_001",
+          "seller": "TechCorp Solutions",
+          "buyer": "Enterprise Client A",
+          "amount": 50000,
+          "dueDate": "2025-12-20",
+          "riskScore": 85,
+          "unlockable": 47500
+        }
+      ],
+      "saas_mrr": [
+        {
+          "id": "saas_001",
+          "company": "CloudTools Inc",
+          "mrr": 25000,
+          "growth": 12,
+          "churn": 3,
+          "projection": 28000
+        }
+      ],
+      "creators": [
+        {
+          "id": "creator_001",
+          "platform": "YouTube",
+          "channel": "TechExplained",
+          "monthlyRevenue": 8000,
+          "subscribers": 150000,
+          "engagementRate": 4.5
+        }
+      ],
+      "rentals": [
+        {
+          "id": "rental_001",
+          "property": "Downtown Apartment Complex",
+          "monthlyIncome": 35000,
+          "occupancy": 95,
+          "location": "Mumbai"
+        }
+      ],
+      "luxury": [
+        {
+          "id": "luxury_001",
+          "asset": "Ferrari 488 Spider",
+          "leaseRevenue": 15000,
+          "leaseTerm": 36,
+          "residualValue": 250000
+        }
+      ]
+    }
+  },
+  "ux_flows": {
+    "get_cash_flow": [
+      "User selects receivable type from 5 options",
+      "Connects data source (mock OAuth flow)",
+      "AI analyzes and shows potential unlock amount",
+      "User adjusts amount and sees APY/risk",
+      "Self.xyz KYC check (mock popup)",
+      "Confirmation with mock wallet signature",
+      "Success animation with token receipt"
+    ],
+    "invest_flow": [
+      "Browse baskets with filters",
+      "Click basket for detailed view",
+      "Use simulator to preview returns",
+      "Enter investment amount",
+      "Mock wallet connection and approval",
+      "NFT receipt minted (visual only)",
+      "Dashboard shows new position"
+    ],
+    "payout_flow": [
+      "Backend mock triggers payout event",
+      "WebSocket sends notification to UI",
+      "Dashboard updates with distribution",
+      "Payout timeline shows completion",
+      "Portfolio value increases"
+    ],
+    "default_flow": [
+      "AI detects missed payment",
+      "Risk scores update across baskets",
+      "DID reputation decreases",
+      "Investors notified of default",
+      "Recovery options displayed"
+    ]
+  },
+  "web3_integration_mocks": {
+    "wallet": {
+      "provider": "Mock MetaMask",
+      "networks": ["Polygon", "Arbitrum"],
+      "accounts": ["0x1234...5678", "0x8765...4321"]
+    },
+    "contracts": {
+      "FlashFlowToken": "0xMOCK...TOKEN",
+      "FlashFlowAgent": "0xMOCK...AGENT",
+      "FlashFlowOracle": "0xMOCK...ORACLE"
+    },
+    "transactions": {
+      "tokenize": "Returns mock tx hash instantly",
+      "invest": "Shows pending then confirmed",
+      "payout": "Simulates batched distribution"
+    }
+  },
+  "animations": {
+    "cash_flow_viz": "Animated particles flowing from future to present",
+    "risk_pulse": "Pulsing glow on risk badges based on score",
+    "token_mint": "Coins dropping into wallet animation",
+    "basket_composition": "Morphing pie chart on hover",
+    "reputation_orbit": "3D orbit of verification badges"
+  },
+  "accessibility": {
+    "standards": "WCAG 2.1 AA",
+    "requirements": [
+      "All interactions keyboard navigable",
+      "Screen reader announcements for updates",
+      "High contrast mode support",
+      "Reduced motion alternatives",
+      "Clear focus indicators"
+    ]
+  },
+  "testing_ids": {
+    "core_flows": [
+      "data-testid=select-cashflow-type",
+      "data-testid=connect-datasource",
+      "data-testid=unlock-amount",
+      "data-testid=invest-basket",
+      "data-testid=view-dashboard",
+      "data-testid=kyc-verify"
+    ]
+  },
+  "hackathon_optimizations": {
+    "demo_mode": {
+      "auto_kyc": "Self.xyz always returns verified",
+      "instant_tokenization": "No waiting for blockchain",
+      "mock_payouts": "Trigger manually from UI",
+      "preset_wallets": "Pre-funded demo accounts"
+    },
+    "judge_wow_factors": [
+      "Live risk score updates via WebSocket",
+      "AI explanation tooltips everywhere",
+      "Smooth multi-step wizards",
+      "Beautiful data visualizations",
+      "Mobile-responsive design",
+      "Working investment simulator"
+    ]
+  },
+  "commands_for_cursor": [
+    "Only use the current setup we have in client folder",
+    "Install dependencies if not present: shadcn/ui, lucide-react, recharts, zustand, react-hook-form, zod, sonner, framer-motion",
+    "Configure Neo-Brutalist theme in tailwind.config",
+    "Create layout with persistent header/footer",
+    "Build all routes as specified",
+    "Implement TokenizationWizard component",
+    "Setup mock services with faker seed",
+    "Add WebSocket mock for live updates",
+    "Create all 5 use-case specific pages",
+    "Build unified /get-cash flow",
+    "Implement investment marketplace",
+    "Add dashboard with portfolio tracking",
+    "Create AI Oracle transparency page",
+    "Setup Self.xyz DID mock integration",
+    "Add animations with framer-motion",
+    "Ensure mobile responsiveness",
+    "Add demo data preset buttons",
+    "Remove the unnecessary existing things which are not used"
+  ],
+  "acceptance_criteria": [
+    "All 5 use cases have dedicated flows",
+    "Unified /get-cash page works for all types",
+    "Investment marketplace shows live baskets",
+    "Dashboard displays portfolio with mock updates",
+    "AI risk scores visible throughout",
+    "Self.xyz KYC integration mocked",
+    "Neo-Brutalist design consistently applied",
+    "Mobile responsive on all pages",
+    "Demo flows completable in <2 minutes",
+    "No real blockchain calls made"
+  ]
+}

@@ -10,7 +10,7 @@ DEPLOYMENTS_DIR="$ROOT_DIR/deployments"
 SEEDER_DIR="$ROOT_DIR/ai-seeder"
 
 # ---- Check deployment exists ----
-DEPLOY_FILE="${DEPLOY_FILE:-$DEPLOYMENTS_DIR/westend.json}"
+DEPLOY_FILE="${DEPLOY_FILE:-$DEPLOYMENTS_DIR/polkadot-hub-testnet.json}"
 if [[ ! -f "$DEPLOY_FILE" ]]; then
   echo "ERROR: Deployment file not found: $DEPLOY_FILE"
   echo "  Run scripts/deploy.sh first."

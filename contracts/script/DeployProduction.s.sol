@@ -10,25 +10,25 @@ import {EvolutionEngine} from "../src/EvolutionEngine.sol";
 import {XCMRouter} from "../src/xcm/XCMRouter.sol";
 
 /// @title DeployProduction
-/// @notice Foundry deployment script for the ALIVE Protocol on Westend Asset Hub.
+/// @notice Foundry deployment script for the ALIVE Protocol on Polkadot Hub TestNet.
 ///
 ///         This script deploys the full ALIVE stack with the REAL XCM integration
 ///         using the XCMRouter in PRODUCTION mode. It connects to the Polkadot Hub
 ///         XCM precompile at 0x0...0A0000 for actual cross-chain asset transfers.
 ///
-///         Target Network: Westend Asset Hub (Chain ID: 420420421)
-///         RPC: https://westend-asset-hub-eth-rpc.polkadot.io
+///         Target Network: Polkadot Hub TestNet (Chain ID: 420420417)
+///         RPC: https://eth-rpc-testnet.polkadot.io/
 ///
 ///         Deploy:
 ///           PRIVATE_KEY=<key> forge script script/DeployProduction.s.sol \
-///             --rpc-url https://westend-asset-hub-eth-rpc.polkadot.io \
+///             --rpc-url https://eth-rpc-testnet.polkadot.io/ \
 ///             --broadcast --via-ir
 ///
 ///         Prerequisites:
-///           - Deployer account funded with WND (Westend DOT) for gas
+///           - Deployer account funded with PAS (Paseo) for gas
 ///           - Stablecoin tokens available on Asset Hub (USDT asset ID 1984)
 contract DeployProduction is Script {
-    // ----- Westend Asset Hub Config -----
+    // ----- Polkadot Hub TestNet Config -----
     uint32 constant ASSET_HUB_PARA_ID = 1000;         // Asset Hub parachain ID
     uint128 constant USDT_ASSET_ID = 1984;             // USDT GeneralIndex on Asset Hub
     uint128 constant USDC_ASSET_ID = 1337;             // USDC GeneralIndex on Asset Hub
@@ -44,7 +44,7 @@ contract DeployProduction is Script {
         uint256 deployerPK = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(deployerPK);
 
-        // Stablecoin address on Westend Asset Hub (ERC20 precompile for USDT)
+        // Stablecoin address on Polkadot Hub TestNet (ERC20 precompile for USDT)
         // On Asset Hub, pallet-assets tokens are exposed via ERC20 precompiles
         // Address format: 0xFFFFFFFF + asset_id_hex
         address stablecoinAddr = vm.envOr(
@@ -53,7 +53,7 @@ contract DeployProduction is Script {
         );
 
         console2.log("=== ALIVE Protocol - Production Deployment ===");
-        console2.log("Network: Westend Asset Hub");
+        console2.log("Network: Polkadot Hub TestNet");
         console2.log("Deployer:", deployer);
         console2.log("");
 

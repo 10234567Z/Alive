@@ -1,5 +1,3 @@
-fe.*
-
 node_modules
 cache
 broadcast/*
@@ -11,5 +9,6 @@ out
 package-lock.json
 
 .next
-
-deliverables.md
+.venv
+.env
+__pycache__

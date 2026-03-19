@@ -18,7 +18,7 @@ import {XCMRouter} from "../src/xcm/XCMRouter.sol";
 ///         switches to local token transfers instead of calling the real
 ///         XCM precompile. This ensures the code path is identical.
 ///
-///         For production deployment on Westend Asset Hub, use DeployProduction.s.sol.
+///         For production deployment on Polkadot Hub TestNet, use DeployProduction.s.sol.
 ///
 ///         Deploy Order:
 ///         1. MockStablecoin (testnet USDC)
@@ -119,7 +119,7 @@ contract Deploy is Script {
         console2.log("");
         console2.log("XCM Integration:");
         console2.log("  Mode: SIMULATION (local token transfers)");
-        console2.log("  Switch to PRODUCTION for Westend Asset Hub");
+        console2.log("  Switch to PRODUCTION for Polkadot Hub TestNet");
         console2.log("  Production precompile: 0x0...0A0000");
         console2.log("");
         console2.log("--- Copy these addresses ---");

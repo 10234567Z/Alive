@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# ALIVE Protocol — Deploy to Polkadot Hub Testnet (Westend)
+# ALIVE Protocol — Deploy to Polkadot Hub TestNet
 # ============================================================
 set -euo pipefail
 
@@ -9,8 +9,8 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 CONTRACTS_DIR="$ROOT_DIR/contracts"
 DEPLOYMENTS_DIR="$ROOT_DIR/deployments"
 
-# ---- Default RPC for Westend Asset Hub (EVM) ----
-RPC_URL="${RPC_URL:-https://westend-asset-hub-eth-rpc.polkadot.io}"
+# ---- Default RPC for Polkadot Hub TestNet (EVM) ----
+RPC_URL="${RPC_URL:-https://eth-rpc-testnet.polkadot.io/}"
 
 # ---- Check PRIVATE_KEY ----
 if [[ -z "${PRIVATE_KEY:-}" ]]; then
@@ -71,12 +71,12 @@ for tx in data.get('transactions', []):
 
 # Write deployments JSON
 output = {
-    'network': 'westend-asset-hub',
+    'network': 'polkadot-hub-testnet',
     'rpc': '$RPC_URL',
     'contracts': contracts
 }
 
-with open('$DEPLOYMENTS_DIR/westend.json', 'w') as f:
+with open('$DEPLOYMENTS_DIR/polkadot-hub-testnet.json', 'w') as f:
     json.dump(output, f, indent=2)
 
 print()
@@ -84,7 +84,7 @@ print('=== Deployed Contract Addresses ===')
 for name, addr in contracts.items():
     print(f'  {name}: {addr}')
 print()
-print(f'Saved to: $DEPLOYMENTS_DIR/westend.json')
+print(f'Saved to: $DEPLOYMENTS_DIR/polkadot-hub-testnet.json')
 "
   fi
 fi

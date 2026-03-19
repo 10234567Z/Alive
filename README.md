@@ -175,20 +175,21 @@ Files:
 - `src/mutation.rs` — Genome mutation. Randomly perturbs one or more fields within bounded ranges.
 - `src/types.rs` — Shared types: DNA struct, PerformanceRecord, FitnessScore.
 
-Compilation target: `riscv32em-unknown-none-elf` (PolkaVM).
+Compilation target: `riscv32im-unknown-none-elf` (PolkaVM).
 
 This module is the Track 2 submission. EVM contracts call Rust functions through the PVM precompile. The genetic algorithm logic runs natively on RISC-V, not interpreted as EVM bytecode.
 
 ### Module 3: AI Seeder (Python)
 
-Directory: `agents/`
+Directory: `ai-seeder/`
 
 Files:
 - `seeder.py` — Main loop. Monitors the Ecosystem for population metrics (diversity index, average fitness, population count). When diversity drops below threshold or population is too small, generates new Creature DNA.
-- `dna_generator.py` — Uses an LLM (OpenAI/Claude) to generate novel strategy parameter sets. Prompt includes current market conditions and existing population DNA to ensure diversity.
-- `market_scanner.py` — Queries parachain RPCs and indexers (Subsquid) for current yield opportunities, TVL, and pool metadata. Feeds data to the LLM as context.
+- `dna_generator.py` — Uses an LLM (OpenAI/Claude via LangChain) to generate novel strategy parameter sets. Prompt includes current market conditions and existing population DNA to ensure diversity.
+- `market_scanner.py` — Queries parachain RPCs for current yield opportunities, TVL, and pool metadata. Feeds data to the LLM as context.
 - `submitter.py` — Signs and submits transactions to the Ecosystem contract to inject new seed Creatures.
-- `config.yaml` — RPC endpoints, LLM API keys, population thresholds, submission intervals.
+- `config.py` — Configuration: RPC URLs, contract addresses, API keys (loaded from `.env`).
+- `abi.py` — Contract ABIs for web3 interaction.
 
 The AI Seeder does not control funds. It can only suggest new DNA. The on-chain contracts decide whether to accept the seed based on population rules.
 
@@ -203,24 +204,23 @@ Key views:
 - **Epoch Timeline** — Horizontal timeline showing each epoch. What happened: births, deaths, top performer, average yield.
 - **Leaderboard** — Ranked list of Creatures by fitness score, returns, and survival streak.
 
-Tech: Next.js, TypeScript, wagmi, viem, ethers.js, HTML Canvas (for ecosystem visualization).
+Tech: Next.js 16, TypeScript, wagmi, viem, Recharts, Framer Motion, TailwindCSS v4.
 
 ### Module 5: Deployment and Testing
 
 Directory: `scripts/`, `test/`
 
 Testing:
-- `test/Ecosystem.t.sol` — Foundry tests for deposit, withdraw, epoch transitions, capital allocation.
-- `test/Creature.t.sol` — Tests for DNA storage, strategy execution mocking, return reporting.
-- `test/GenePool.t.sol` — Tests for crossover logic, mutation bounds, kill conditions, reproduction.
-- `test/integration/` — Full lifecycle test: deposit, spawn, feed, score, breed, withdraw.
-- `pvm/tests/` — Rust unit tests for fitness calculation, crossover correctness, mutation bounds.
-- `agents/tests/` — Python tests for DNA generation, market scanning, transaction submission.
+- `test/ALIVE.t.sol` — 23 Foundry tests for deposits, withdrawals, spawning, epoch cycle, factory, creature lifecycle.
+- `test/Evolution.t.sol` — 23 tests for fitness scoring, crossover, mutation, XCM flow, full evolution cycle, fitness-weighted allocation.
+- `test/XCMRouter.t.sol` — 27 tests for XCM routing, SCALE encoding, message building, asset registration, dual-mode operation.
+- `pvm/src/` — 17 Rust unit tests inline for fitness calculation, crossover correctness, mutation bounds.
 
 Deployment:
-- `scripts/deploy.sh` — Deploy contracts to Polkadot Hub testnet (Westend).
+- `scripts/deploy.sh` — Deploy contracts to Polkadot Hub TestNet.
 - `scripts/seed.sh` — Run the AI Seeder to populate initial Creatures.
 - `scripts/epoch.sh` — Trigger an epoch manually for demo purposes.
+- `keeper/epoch-keeper.sh` — Automated epoch advancement daemon.
 
 ---
 
@@ -228,14 +228,13 @@ Deployment:
 
 | Layer | Technology |
 |---|---|
-| Smart Contracts | Solidity, Foundry |
-| PVM Module | Rust, compiled to RISC-V for PolkaVM |
+| Smart Contracts | Solidity 0.8.24, Foundry |
+| PVM Module | Rust (`no_std`), compiled to RISC-V for PolkaVM |
 | AI Seeder | Python, LangChain, OpenAI API |
-| Cross-chain | XCM precompile on Polkadot Hub |
-| Indexing | Subsquid |
-| Frontend | Next.js, TypeScript, wagmi, viem, Canvas API |
-| Testing | Foundry (forge), pytest, Rust unit tests |
-| Deployment | Polkadot Hub Testnet (Westend) |
+| Cross-chain | XCM precompile on Polkadot Hub + SCALE codec |
+| Frontend | Next.js 16, TypeScript, wagmi, viem, Recharts, Framer Motion |
+| Testing | Foundry (73 tests), Rust (17 tests) |
+| Deployment | Polkadot Hub TestNet (Chain 420420417) |
 
 ---
 
@@ -245,66 +244,65 @@ Deployment:
 polka/
 ├── contracts/
 │   ├── src/
-│   │   ├── Ecosystem.sol
-│   │   ├── Creature.sol
-│   │   ├── GenePool.sol
-│   │   ├── CreatureFactory.sol
+│   │   ├── Ecosystem.sol           # Vault + epoch state machine
+│   │   ├── Creature.sol            # Autonomous strategy agent
+│   │   ├── GenePool.sol            # Evolution orchestrator
+│   │   ├── CreatureFactory.sol     # Deterministic creature deployment
+│   │   ├── EvolutionEngine.sol     # EVM fitness/crossover/mutation
 │   │   ├── interfaces/
-│   │   │   ├── IEvolutionEngine.sol
 │   │   │   ├── ICreature.sol
+│   │   │   ├── IEvolutionEngine.sol
 │   │   │   ├── IXCM.sol
 │   │   │   └── IPolkadotXcm.sol
 │   │   └── xcm/
-│   │       ├── ScaleCodec.sol
-│   │       ├── XCMMessageBuilder.sol
-│   │       └── XCMRouter.sol
+│   │       ├── ScaleCodec.sol       # SCALE encoding for XCM
+│   │       ├── XCMMessageBuilder.sol # XCM V4 message construction
+│   │       └── XCMRouter.sol        # Dual-mode XCM adapter
 │   ├── test/
-│   │   ├── ALIVE.t.sol
-│   │   ├── Evolution.t.sol
-│   │   ├── XCMRouter.t.sol
+│   │   ├── ALIVE.t.sol              # 23 core tests
+│   │   ├── Evolution.t.sol          # 23 evolution tests
+│   │   ├── XCMRouter.t.sol          # 27 XCM tests
 │   │   └── mocks/
-│   │       ├── MockXCM.sol
-│   │       ├── MockStablecoin.sol
-│   │       └── MockEvolutionEngine.sol
 │   ├── script/
-│   │   ├── Deploy.s.sol
-│   │   └── DeployProduction.s.sol
+│   │   ├── Deploy.s.sol             # Local deployment
+│   │   ├── DeployProduction.s.sol   # Polkadot Hub TestNet deployment
+│   │   └── SpawnCreatures.s.sol     # Spawn initial population
 │   └── foundry.toml
 ├── pvm/
 │   ├── src/
-│   │   ├── lib.rs
-│   │   ├── fitness.rs
-│   │   ├── crossover.rs
-│   │   ├── mutation.rs
-│   │   └── types.rs
-│   ├── tests/
+│   │   ├── lib.rs                   # PVM precompile entry points
+│   │   ├── fitness.rs               # Fitness evaluation
+│   │   ├── crossover.rs             # Genome crossover
+│   │   ├── mutation.rs              # Genome mutation
+│   │   └── types.rs                 # Shared types
 │   └── Cargo.toml
-├── agents/
-│   ├── seeder.py
-│   ├── dna_generator.py
-│   ├── market_scanner.py
-│   ├── submitter.py
-│   ├── config.yaml
+├── ai-seeder/
+│   ├── seeder.py                    # Main orchestrator
+│   ├── dna_generator.py             # LLM-powered DNA generation
+│   ├── market_scanner.py            # DeFi market data
+│   ├── submitter.py                 # On-chain submission
+│   ├── config.py                    # Configuration
+│   ├── abi.py                       # Contract ABIs
 │   ├── requirements.txt
-│   └── tests/
-├── frontend/
+│   └── .env.example
+├── frontend/                        # Next.js 16 Neo-Brutalist dashboard
 │   ├── src/
-│   │   ├── app/
-│   │   ├── components/
-│   │   │   ├── EcosystemCanvas.tsx
-│   │   │   ├── CreatureInspector.tsx
-│   │   │   ├── DepositPanel.tsx
-│   │   │   ├── EpochTimeline.tsx
-│   │   │   └── Leaderboard.tsx
-│   │   ├── hooks/
-│   │   └── lib/
+│   │   ├── app/                     # Pages: /, /dashboard, /leaderboard
+│   │   ├── components/              # UI components
+│   │   ├── hooks/                   # Contract interaction hooks
+│   │   ├── stores/                  # Zustand state management
+│   │   └── lib/                     # Types, contracts, utilities
 │   └── package.json
+├── keeper/
+│   └── epoch-keeper.sh              # Automated epoch advancement
 ├── scripts/
-│   ├── deploy.sh
-│   ├── seed.sh
-│   └── epoch.sh
+│   ├── deploy.sh                    # Testnet deployment
+│   ├── seed.sh                      # AI Seeder runner
+│   ├── epoch.sh                     # Manual epoch trigger
+│   └── epoch-runner.sh              # Epoch simulation
 ├── docs/
 │   └── ARCHITECTURE.md
+├── deliverables.md
 └── README.md
 ```
 
@@ -313,29 +311,48 @@ polka/
 ## Getting Started
 
 ```bash
-git clone https://github.com/<your-repo>/alive.git
-cd alive
+git clone https://github.com/<your-repo>/polka.git
+cd polka
 
 # Contracts
 cd contracts
 forge install
-forge build
-forge test
+forge build --via-ir
+forge test --via-ir -vv         # 73 tests
 
 # PVM Module
 cd ../pvm
-cargo build --target riscv32em-unknown-none-elf
+cargo test                       # 17 tests (runs on host)
+# cargo build --target riscv32im-unknown-none-elf  # for PolkaVM deployment
 
 # AI Seeder
-cd ../agents
+cd ../ai-seeder
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp config.yaml.example config.yaml  # add your RPC endpoints and API keys
+cp .env.example .env             # add your RPC endpoints and API keys
 python seeder.py
 
 # Frontend
 cd ../frontend
 npm install
-npm run dev
+npm run dev                      # http://localhost:3000
+```
+
+### Deploy to Polkadot Hub TestNet
+
+```bash
+# Deploy contracts to testnet
+PRIVATE_KEY=<your-key> forge script script/DeployProduction.s.sol \
+  --rpc-url https://eth-rpc-testnet.polkadot.io/ \
+  --broadcast --via-ir
+
+# Spawn initial creature population
+PRIVATE_KEY=<key> ECOSYSTEM=<addr> forge script script/SpawnCreatures.s.sol \
+  --rpc-url https://eth-rpc-testnet.polkadot.io/ \
+  --broadcast --via-ir
+
+# Start epoch keeper
+bash keeper/epoch-keeper.sh
 ```
 
 ---

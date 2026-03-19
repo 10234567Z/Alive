@@ -1,17 +1,16 @@
 {
-  "name": "frontend",
+  "name": "alive-frontend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "ALIVE Protocol - Evolutionary DeFi dashboard on Polkadot",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["polkadot", "defi", "evolution", "dashboard"],
+  "author": "ALIVE Protocol",
+  "license": "MIT",
   "type": "module",
   "dependencies": {
     "@tailwindcss/postcss": "^4.2.1",
